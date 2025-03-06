@@ -20,16 +20,16 @@ module.exports = {
 			if (!data?.announcement_channel) return
 
 			const channelId = data.announcement_channel
-
 			const channel = await newState.guild.channels.fetch(channelId)
 
 			const embed = successEmbed()
 				.setAuthor({ name: `${newState.member.user.tag} - ${newState.member.id}`, iconURL: newState.member.user.displayAvatarURL({ dynamic: true }) })
 				.setTitle("New Voice Channel Session")
 				.setDescription(`${newState.channel} | <t:${millisecondsToSeconds(now)}:R>`)
-				.addFields({ name: "Started By", value: `${newState.member} (${newState.member.user.tag} - ${newState.member.id})` })
+				.addFields({ name: "Started By", value: `${newState.member.displayName}`})
+				.addFields({ name: "Current Members", value: `${newState.channel.members.map(v => v.displayName).join(", ")}`})
 
-			channel.send({ content: "@everyone", embeds: [embed] })
+			channel.send({ content: `${newState.member.displayName} joined ${newState.channel} | <t:${millisecondsToSeconds(now)}:R>`, embeds: [embed] })
 		}
 	}
 }

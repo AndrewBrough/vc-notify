@@ -2,6 +2,10 @@
 ## Node.JS
 Since this bot uses Node.JS you will need to download and install Node.JS from [the official Node.JS website](https://nodejs.org/en/).
 
+## Deploying
+
+You can run this on a server using `npm run start`. It'll automatically connect assuming you've configured your bot token in config.json.
+
 ## Creating A Bot
 To create a bot go to the [Discord Developer Portal](https://discord.com/developers/applications) and then click the **New Application** button at the top right.
 
