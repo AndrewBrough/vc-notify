@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js")
 const { readdirSync } = require("fs")
-const { token } = require("./data/config.json")
+require('dotenv').config()
 
 const client = new Client({
 	intents: [
@@ -29,4 +29,4 @@ readdirSync("./events").forEach(file => {
 	}
 })
 
-client.login(token)
+client.login(process.env.DISCORD_BOT_TOKEN)

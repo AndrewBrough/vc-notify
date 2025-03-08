@@ -1,8 +1,10 @@
 {
   "scripts": {
-    "start": "npx pm2 start index.js --name 'Voice Channel Logger'"
+    "start": "npx pm2 start index.js --name 'Voice Channel Logger'",
+    "stop": "npx pm2 stop 'Voice Channel Logger'"
   },
   "dependencies": {
-    "discord.js": "^14.7.1"
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.4.7"
   }
 }

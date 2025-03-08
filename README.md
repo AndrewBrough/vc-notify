@@ -4,7 +4,7 @@ Since this bot uses Node.JS you will need to download and install Node.JS from [
 
 ## Deploying
 
-You can run this on a server using `npm run start`. It'll automatically connect assuming you've configured your bot token in config.json.
+You can run this on a server using `npm run start`. It'll automatically connect assuming you've configured your bot token in the `.env` file.
 
 ## Creating A Bot
 To create a bot go to the [Discord Developer Portal](https://discord.com/developers/applications) and then click the **New Application** button at the top right.
@@ -33,9 +33,11 @@ Click **Reset Token** and then copy the new long text.
 You may need to go through 2FA if you have 2FA enabled.
 
 ## Setting Up VC New Session Announcer
-Now that you have the token you can go to the **data** folder and then open **config.json** in Notepad, Kate, or whichever text editor you use.
-
-Once **config.json** opens up, replace **ENTER_BOT_TOKEN** with the bot token you copied from Discord and then save the file.
+Now that you have the token, create a `.env` file in the root directory of the project and add the following line:
+```
+DISCORD_BOT_TOKEN=your_token_here
+```
+Replace `your_token_here` with the bot token you copied from Discord.
 
 Open command prompt, konsole, or whichever terminal application you use in the root folder (root folder = folder that contains the **index.js** file) and then type **npm i**, this will install packages.
 Once the packages have installed type **node index.js**.
