@@ -1,6 +1,10 @@
 const { Client, GatewayIntentBits, Collection } = require("discord.js")
 const { readdirSync } = require("fs")
+const { initializeDataDirectory } = require('./utils/init')
 require('dotenv').config()
+
+// Initialize data directory and files
+initializeDataDirectory();
 
 const client = new Client({
 	intents: [

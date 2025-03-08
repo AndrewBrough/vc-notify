@@ -42,6 +42,8 @@ Replace `your_token_here` with the bot token you copied from Discord.
 Open command prompt, konsole, or whichever terminal application you use in the root folder (root folder = folder that contains the **index.js** file) and then type **npm i**, this will install packages.
 Once the packages have installed type **node index.js**.
 
+The bot will automatically create a `data` directory with the necessary configuration files on first run.
+
 If everything goes well, you should see **Connected to <bot_tag>** in your terminal.
 
 Now you can go to the server you added the bot to and then type **/set_announcement_channel #channel** to setup an announcement channel.
