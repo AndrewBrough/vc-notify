@@ -1,9 +1,20 @@
-const { Client, VoiceState } = require("discord.js");
+const { Client, VoiceState, PermissionFlagsBits } = require("discord.js");
 const { readJSON, successEmbed, millisecondsToSeconds } = require("../functions");
 
 const activeVoiceSessions = new Map(); // Store message IDs for each channel
 const sessionData = new Map(); // Store session data (starter and start time)
 const memberJoinTimes = new Map(); // Store member join times for each channel
+
+/**
+ * Checks if a channel is private (not visible to @everyone)
+ * @param {VoiceChannel} channel - The voice channel to check
+ * @returns {boolean} Whether the channel is private
+ */
+function isPrivateChannel(channel) {
+  if (!channel) return false;
+  const everyoneRole = channel.guild.roles.everyone;
+  return !channel.permissionsFor(everyoneRole).has(PermissionFlagsBits.ViewChannel);
+}
 
 module.exports = {
   once: false,
@@ -21,6 +32,11 @@ module.exports = {
     const channel = await (newState.guild || oldState.guild).channels.fetch(guildData.announcement_channel);
     const voiceChannel = newState.channel || oldState.channel;
     const firstMember = voiceChannel?.members.first()?.displayName || "Unknown";
+
+    // Skip if either the old or new channel is private
+    if (isPrivateChannel(oldState.channel) || isPrivateChannel(newState.channel)) {
+      return;
+    }
 
     // Handle member leaving
     if (oldState.channel) {
