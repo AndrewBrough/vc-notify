@@ -9,7 +9,7 @@ A Discord bot that announces when users join voice channels, with support for pu
 - **Multi-Server Support**: Works across multiple Discord servers
 - **Permission-Based Setup**: Different permission levels for public vs private channels
 - **TypeScript**: Built with TypeScript for better type safety and development experience
-- **Timezone Support**: Customizable timezone for accurate time display
+- **Rich Embeds**: Beautiful embed messages with interactive timestamps that display in each user's local timezone
 
 ## Installation
 
@@ -70,21 +70,6 @@ npm run format       # Format code with Prettier
 - `/set_private_channel #channel` - Set the announcement channel for private voice channels (must be a private channel)
 - `/remove_private_channel` - Remove the private announcement channel
 
-### Timezone Settings (Manage Messages permission required)
-- `/set_timezone <timezone>` - Set the timezone for voice channel announcements
-- `/remove_timezone` - Remove custom timezone setting (revert to default)
-
-#### Available Timezones
-- Eastern Time (ET) - `America/New_York`
-- Central Time (CT) - `America/Chicago`
-- Mountain Time (MT) - `America/Denver`
-- Pacific Time (PT) - `America/Los_Angeles`
-- UTC - `UTC`
-- London (GMT) - `Europe/London`
-- Paris (CET) - `Europe/Paris`
-- Tokyo (JST) - `Asia/Tokyo`
-- Sydney (AEDT) - `Australia/Sydney`
-
 ## Bot Permissions
 
 The bot requires the following permissions:
@@ -92,6 +77,7 @@ The bot requires the following permissions:
 - **Send Messages** - To send announcements
 - **Mention @everyone** - To mention users in announcements
 - **Use Slash Commands** - To register and use slash commands
+- **Embed Links** - To send rich embed messages
 
 ## Inviting the Bot
 
@@ -106,6 +92,7 @@ The bot requires the following permissions:
    - Send Messages
    - Mention Everyone
    - Use Slash Commands
+   - Embed Links
 6. Use the generated URL to invite the bot to your server
 
 ## Troubleshooting
@@ -121,12 +108,6 @@ If you're seeing duplicate announcements:
 1. Check if multiple bot instances are running
 2. Use `pm2 list` to see running processes
 3. Stop any duplicate instances with `pm2 stop <process-name>`
-
-### Timezone Issues
-If the time displayed is incorrect:
-1. Use `/set_timezone` to configure the correct timezone for your server
-2. The bot will automatically use the server's timezone for all future announcements
-3. Use `/remove_timezone` to revert to the default timezone
 
 ## Development
 

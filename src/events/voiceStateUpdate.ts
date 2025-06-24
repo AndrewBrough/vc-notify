@@ -1,5 +1,5 @@
 import { PermissionFlagsBits, TextChannel, VoiceState } from 'discord.js';
-import { formatTime, readJSON } from '../utils/functions';
+import { createVoiceJoinEmbed, readJSON } from '../utils/functions';
 
 function isPrivateChannel(channel: any): boolean {
   if (!channel) return false;
@@ -11,21 +11,25 @@ function isChannelChange(oldState: VoiceState, newState: VoiceState): boolean {
   return oldState.channelId !== newState.channelId;
 }
 
-async function handlePublicChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel, timezone?: string) {
+async function handlePublicChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel) {
   if (newState.channel && oldState.channelId !== newState.channelId) {
-    const joinTime = formatTime(new Date(), timezone);
-    await announcementChannel.send(
-      `${newState.member?.displayName} joined ${newState.channel.name} at ${joinTime}`
+    const embed = createVoiceJoinEmbed(
+      newState.member?.displayName || 'Unknown User',
+      newState.channel.name,
+      false
     );
+    await announcementChannel.send({ embeds: [embed] });
   }
 }
 
-async function handlePrivateChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel, timezone?: string) {
+async function handlePrivateChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel) {
   if (newState.channel && oldState.channelId !== newState.channelId) {
-    const joinTime = formatTime(new Date(), timezone);
-    await announcementChannel.send(
-      `${newState.member?.displayName} joined private ${newState.channel.name} at ${joinTime}`
+    const embed = createVoiceJoinEmbed(
+      newState.member?.displayName || 'Unknown User',
+      newState.channel.name,
+      true
     );
+    await announcementChannel.send({ embeds: [embed] });
   }
 }
 
@@ -50,13 +54,10 @@ export default {
       const announcementChannel = await (newState.guild || oldState.guild)?.channels.fetch(announcementChannelId) as TextChannel;
       if (!announcementChannel) return;
 
-      // Get the guild's custom timezone if set
-      const timezone = guildData.timezone;
-
       if (isPrivate) {
-        await handlePrivateChannelUpdate(oldState, newState, announcementChannel, timezone);
+        await handlePrivateChannelUpdate(oldState, newState, announcementChannel);
       } else {
-        await handlePublicChannelUpdate(oldState, newState, announcementChannel, timezone);
+        await handlePublicChannelUpdate(oldState, newState, announcementChannel);
       }
     } catch (error) {
       console.error('Error handling voice state update:', error);

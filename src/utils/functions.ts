@@ -35,29 +35,27 @@ export function writeJSON(filePath: string, dataPath: string, data: any): void {
   writeFileSync(filePath, newJSON);
 }
 
-export function formatTime(date: Date = new Date(), timezone: string = 'America/New_York'): string {
-  try {
-    return date.toLocaleTimeString('en-US', {
-      timeZone: timezone,
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch (error) {
-    // Fallback to local time if timezone is invalid
-    console.warn(`Invalid timezone: ${timezone}, falling back to local time`);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  }
-}
-
 export function successEmbed(): EmbedBuilder {
   return new EmbedBuilder().setColor(0x57f287);
 }
 
 export function errorEmbed(): EmbedBuilder {
   return new EmbedBuilder().setColor(0xed4245);
+}
+
+export function createVoiceJoinEmbed(memberName: string, channelName: string, isPrivate: boolean = false): EmbedBuilder {
+  const now = Math.floor(Date.now() / 1000); // Convert to Unix timestamp for Discord formatting
+  const embed = new EmbedBuilder()
+    .setColor(0x57f287) // Green color for join events
+    .setTitle('🎤 Voice Channel Join')
+    .setDescription(`${memberName} joined ${isPrivate ? 'private ' : ''}${channelName}`)
+    .addFields(
+      { name: 'Member', value: memberName, inline: true },
+      { name: 'Channel', value: channelName, inline: true },
+      { name: 'Joined At', value: `<t:${now}:F>`, inline: true }
+    )
+    .setTimestamp()
+    .setFooter({ text: 'Voice Channel Announcer' });
+
+  return embed;
 } 
