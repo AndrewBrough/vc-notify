@@ -69,8 +69,7 @@ async function handleVoiceChannelUpdate(oldState: VoiceState, newState: VoiceSta
       console.log('🟩 Sent session start (green) embed');
     } else {
       const embed = createSecondaryJoinEmbed(
-        memberId,
-        voiceChannel.name
+        memberId
       );
       await textChannel.send({ embeds: [embed] });
       console.log('⬜ Sent secondary join (grey) embed');

@@ -68,11 +68,12 @@ export function isVcNotifyMessage(message: any): boolean {
 export function createVoiceJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
-    .setDescription(`🎤 <@${memberId}> joined ${channelName}`);
+    .setTitle(`🎤 Voice session started in ${channelName}`)
+    .setDescription(`<@${memberId}> is here`);
 }
 
-export function createSecondaryJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
+export function createSecondaryJoinEmbed(memberId: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x747f8d)
-    .setDescription(`🎤 <@${memberId}> joined ${channelName}`);
+    .setDescription(`<@${memberId}> is here`);
 }
