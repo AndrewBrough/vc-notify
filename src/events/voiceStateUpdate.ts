@@ -1,33 +1,71 @@
-import { PermissionFlagsBits, TextChannel, VoiceState } from 'discord.js';
-import { createVoiceJoinEmbed, readJSON } from '../utils/functions';
-
-function isPrivateChannel(channel: any): boolean {
-  if (!channel) return false;
-  const everyoneRole = channel.guild.roles.everyone;
-  return !channel.permissionsFor(everyoneRole).has(PermissionFlagsBits.ViewChannel);
-}
+import { VoiceState } from 'discord.js';
+import {
+  createVoiceJoinEmbed,
+  getVoiceChannelTextChat,
+  isVcNotifyMessage,
+  shouldCreateNewThread
+} from '../utils/functions';
 
 function isChannelChange(oldState: VoiceState, newState: VoiceState): boolean {
   return oldState.channelId !== newState.channelId;
 }
 
-async function handlePublicChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel) {
-  if (newState.channel && oldState.channelId !== newState.channelId) {
-    const embed = createVoiceJoinEmbed(
-      newState.member?.displayName || 'Unknown User',
-      newState.channel.name
-    );
-    await announcementChannel.send({ embeds: [embed] });
-  }
-}
+async function handleVoiceChannelUpdate(oldState: VoiceState, newState: VoiceState) {
+  const guild = newState.guild || oldState.guild;
+  if (!guild) return;
 
-async function handlePrivateChannelUpdate(oldState: VoiceState, newState: VoiceState, announcementChannel: TextChannel) {
-  if (newState.channel && oldState.channelId !== newState.channelId) {
+  // Only handle user joining a channel
+  if (newState.channelId && oldState.channelId !== newState.channelId) {
+    const voiceChannel = newState.channel;
+    if (!voiceChannel) return;
+
+    const textChannel = getVoiceChannelTextChat(voiceChannel);
+    if (!textChannel) return;
+
+    // Get current member count in the voice channel
+    const currentMemberCount = voiceChannel.members.size;
+
+    // Find the last vc-notify message in this text channel
+    const messages = await textChannel.messages.fetch({ limit: 50 });
+    const lastVcNotifyMessage = messages.find(msg => isVcNotifyMessage(msg));
+
     const embed = createVoiceJoinEmbed(
       newState.member?.displayName || 'Unknown User',
-      newState.channel.name
+      voiceChannel.name
     );
-    await announcementChannel.send({ embeds: [embed] });
+
+    // If this is the first person joining (member count = 1) or we should create a new thread
+    if (currentMemberCount === 1 || shouldCreateNewThread(lastVcNotifyMessage)) {
+      // Create new message and thread
+      const message = await textChannel.send({ embeds: [embed] });
+      await message.startThread({
+        name: `Voice Session - ${voiceChannel.name}`,
+        autoArchiveDuration: 60 // 1 hour
+      });
+    } else if (lastVcNotifyMessage) {
+      // Someone else joined - add to existing thread
+      try {
+        const thread = lastVcNotifyMessage.thread;
+        if (thread) {
+          await thread.send({ embeds: [embed] });
+        } else {
+          // Thread doesn't exist, create one
+          const newThread = await lastVcNotifyMessage.startThread({
+            name: `Voice Session - ${voiceChannel.name}`,
+            autoArchiveDuration: 60
+          });
+          await newThread.send({ embeds: [embed] });
+        }
+      } catch (error) {
+        console.error('Error sending message to thread:', error);
+        // Fallback: send new message if thread fails
+        const message = await textChannel.send({ embeds: [embed] });
+        await message.startThread({
+          name: `Voice Session - ${voiceChannel.name}`,
+          autoArchiveDuration: 60
+        });
+      }
+    }
   }
 }
 
@@ -39,24 +77,8 @@ export default {
       return;
     }
 
-    const guildData = readJSON('./data/guild.json')[newState.guild?.id || oldState.guild?.id];
-    if (!guildData) return;
-
-    const channel = newState.channel || oldState.channel;
-    const isPrivate = isPrivateChannel(channel);
-    const announcementChannelId = isPrivate ? guildData.private_announcement_channel : guildData.announcement_channel;
-
-    if (!announcementChannelId) return;
-
     try {
-      const announcementChannel = await (newState.guild || oldState.guild)?.channels.fetch(announcementChannelId) as TextChannel;
-      if (!announcementChannel) return;
-
-      if (isPrivate) {
-        await handlePrivateChannelUpdate(oldState, newState, announcementChannel);
-      } else {
-        await handlePublicChannelUpdate(oldState, newState, announcementChannel);
-      }
+      await handleVoiceChannelUpdate(oldState, newState);
     } catch (error) {
       console.error('Error handling voice state update:', error);
     }

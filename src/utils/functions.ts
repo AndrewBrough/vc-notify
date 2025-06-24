@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { ChannelType, EmbedBuilder, TextChannel } from 'discord.js';
 import { readFileSync, writeFileSync } from 'fs';
 
 export function readJSON(filePath: string): Record<string, any> {
@@ -50,4 +50,34 @@ export function createVoiceJoinEmbed(memberName: string, channelName: string): E
     .setTimestamp()
 
   return embed;
+}
+
+export function getVoiceChannelTextChat(voiceChannel: any): TextChannel | null {
+  if (!voiceChannel || !voiceChannel.guild) return null;
+  
+  // Find the text channel with the same name in the same category
+  const textChannel = voiceChannel.guild.channels.cache.find((channel: any) => 
+    channel.type === ChannelType.GuildText && 
+    channel.parentId === voiceChannel.parentId && 
+    channel.name === voiceChannel.name
+  ) as TextChannel;
+  
+  return textChannel || null;
+}
+
+export function isVcNotifyMessage(message: any): boolean {
+  // Check if this is a vc-notify message by looking for our embed pattern
+  return message.author?.bot && 
+         message.embeds?.length > 0 && 
+         message.embeds[0]?.title?.includes('joined');
+}
+
+export function shouldCreateNewThread(lastMessage: any): boolean {
+  if (!lastMessage) return true;
+  
+  const now = Date.now();
+  const oneMinute = 60 * 1000;
+  const messageAge = now - lastMessage.createdTimestamp;
+  
+  return messageAge > oneMinute;
 } 
