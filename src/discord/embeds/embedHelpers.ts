@@ -1,21 +1,15 @@
 import { EmbedBuilder } from 'discord.js';
 
 export function formatDiscordTimestamp(date: Date): string {
-  return `<t:${Math.floor(date.getTime() / 1000)}:F>`;
+  // Only show the time (e.g., 7:36 PM)
+  return `<t:${Math.floor(date.getTime() / 1000)}:t>`;
 }
 
-export function makeJoinField(memberId: string, joinTime: Date) {
+export function makeJoinOrLeaveField(memberId: string, displayName: string, time: Date, type: 'join' | 'leave') {
+  const emoji = type === 'join' ? '💚' : '💔';
   return {
-    name: 'is here! Joined at:',
-    value: `<@${memberId}> • ${formatDiscordTimestamp(joinTime)}`,
-    inline: false,
-  };
-}
-
-export function makeLeaveField(memberId: string, leaveTime: Date) {
-  return {
-    name: 'left at:',
-    value: `<@${memberId}> • ${formatDiscordTimestamp(leaveTime)}`,
+    name: displayName,
+    value: `<@${memberId}> ${emoji} ${formatDiscordTimestamp(time)}`,
     inline: false,
   };
 }

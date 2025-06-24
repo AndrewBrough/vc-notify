@@ -1,6 +1,6 @@
 import { Events, VoiceState } from 'discord.js';
 import { getVoiceChannelTextChat } from '../discord/channels';
-import { buildSessionEmbed, makeJoinField, makeLeaveField } from '../discord/embeds';
+import { buildSessionEmbed, makeJoinOrLeaveField } from '../discord/embeds';
 import { findLatestEmbedByUser, sendEmbedMessage, updateEmbedMessage } from '../discord/messages';
 import { isSessionExpired } from '../discord/voiceState';
 
@@ -32,7 +32,7 @@ export default {
       const channelWasEmpty = otherMembers.size === 0;
       if (channelWasEmpty) {
         // Start a new session: send a new embed message
-        const fields = [makeJoinField(member.id, new Date())];
+        const fields = [makeJoinOrLeaveField(member.id, member.displayName, new Date(), 'join')];
         const embed = buildSessionEmbed(voiceChannel.name, fields);
         await sendEmbedMessage(textChannel, embed);
         return;
@@ -41,10 +41,22 @@ export default {
 
     // Build or update embed fields for join/leave
     const fields = (lastSessionMsg?.embeds[0]?.fields?.map(f => ({ name: f.name, value: f.value, inline: f.inline ?? false })) || []);
+    const userFieldIndex = fields.findIndex(f => f.name === member.displayName);
+    const now = new Date();
     if (joined) {
-      fields.push(makeJoinField(member.id, new Date()));
+      const newField = makeJoinOrLeaveField(member.id, member.displayName, now, 'join');
+      if (userFieldIndex !== -1) {
+        fields[userFieldIndex] = newField;
+      } else {
+        fields.push(newField);
+      }
     } else if (left) {
-      fields.push(makeLeaveField(member.id, new Date()));
+      const newField = makeJoinOrLeaveField(member.id, member.displayName, now, 'leave');
+      if (userFieldIndex !== -1) {
+        fields[userFieldIndex] = newField;
+      } else {
+        fields.push(newField);
+      }
     }
 
     // Create or update embed
