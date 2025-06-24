@@ -74,12 +74,4 @@ export function isVcNotifyMessage(message: any): boolean {
          message.embeds[0]?.title?.includes('joined');
 }
 
-export function shouldCreateNewThread(lastMessage: any): boolean {
-  if (!lastMessage) return true;
-  
-  const now = Date.now();
-  const oneMinute = 60 * 1000;
-  const messageAge = now - lastMessage.createdTimestamp;
-  
-  return messageAge > oneMinute;
-} 
+// All thread-related code has been removed. No other thread logic remains in this file. 
