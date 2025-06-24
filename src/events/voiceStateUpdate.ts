@@ -15,8 +15,7 @@ async function handlePublicChannelUpdate(oldState: VoiceState, newState: VoiceSt
   if (newState.channel && oldState.channelId !== newState.channelId) {
     const embed = createVoiceJoinEmbed(
       newState.member?.displayName || 'Unknown User',
-      newState.channel.name,
-      false
+      newState.channel.name
     );
     await announcementChannel.send({ embeds: [embed] });
   }
@@ -26,8 +25,7 @@ async function handlePrivateChannelUpdate(oldState: VoiceState, newState: VoiceS
   if (newState.channel && oldState.channelId !== newState.channelId) {
     const embed = createVoiceJoinEmbed(
       newState.member?.displayName || 'Unknown User',
-      newState.channel.name,
-      true
+      newState.channel.name
     );
     await announcementChannel.send({ embeds: [embed] });
   }

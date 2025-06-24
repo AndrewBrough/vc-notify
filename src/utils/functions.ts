@@ -43,19 +43,11 @@ export function errorEmbed(): EmbedBuilder {
   return new EmbedBuilder().setColor(0xed4245);
 }
 
-export function createVoiceJoinEmbed(memberName: string, channelName: string, isPrivate: boolean = false): EmbedBuilder {
-  const now = Math.floor(Date.now() / 1000); // Convert to Unix timestamp for Discord formatting
+export function createVoiceJoinEmbed(memberName: string, channelName: string): EmbedBuilder {
   const embed = new EmbedBuilder()
     .setColor(0x57f287) // Green color for join events
-    .setTitle('🎤 Voice Channel Join')
-    .setDescription(`${memberName} joined ${isPrivate ? 'private ' : ''}${channelName}`)
-    .addFields(
-      { name: 'Member', value: memberName, inline: true },
-      { name: 'Channel', value: channelName, inline: true },
-      { name: 'Joined At', value: `<t:${now}:F>`, inline: true }
-    )
+    .setTitle(`🎤 ${memberName} joined ${channelName}`)
     .setTimestamp()
-    .setFooter({ text: 'Voice Channel Announcer' });
 
   return embed;
 } 
