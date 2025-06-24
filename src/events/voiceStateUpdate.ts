@@ -1,96 +1,58 @@
-import { VoiceBasedChannel, VoiceState } from 'discord.js';
-import {
-  createSecondaryJoinEmbed,
-  createVoiceJoinEmbed,
-  getVoiceChannelTextChat,
-  isVcNotifyMessage
-} from '../utils/functions';
+import { Events, VoiceState } from 'discord.js';
+import { getVoiceChannelTextChat } from '../discord/channels';
+import { buildSessionEmbed, makeJoinField, makeLeaveField } from '../discord/embeds';
+import { findLatestEmbedByUser, sendEmbedMessage, updateEmbedMessage } from '../discord/messages';
+import { isSessionExpired } from '../discord/voiceState';
 
-function isChannelChange(oldState: VoiceState, newState: VoiceState): boolean {
-  return oldState.channelId !== newState.channelId;
-}
+// Main event handler for voice state updates
+export default {
+  name: Events.VoiceStateUpdate,
+  async execute(oldState: VoiceState, newState: VoiceState) {
+    const member = newState.member || oldState.member;
+    if (!member || member.user.bot) return;
 
-async function handleVoiceChannelUpdate(oldState: VoiceState, newState: VoiceState) {
-  console.log('🔍 Voice state update detected');
-  console.log(`   Old channel: ${oldState.channelId || 'none'}`);
-  console.log(`   New channel: ${newState.channelId || 'none'}`);
-  
-  const guild = newState.guild || oldState.guild;
-  if (!guild) {
-    console.log('❌ No guild found');
-    return;
-  }
-  console.log(`   Guild: ${guild.name} (${guild.id})`);
-
-  // Only handle user joining a channel
-  if (newState.channelId && oldState.channelId !== newState.channelId) {
-    console.log('✅ User is joining a channel');
-    
-    const voiceChannel = newState.channel as VoiceBasedChannel;
-    if (!voiceChannel) {
-      console.log('❌ Voice channel not found');
-      return;
-    }
-    console.log(`   Voice channel: ${voiceChannel.name} (${voiceChannel.id})`);
+    const voiceChannel = newState.channel || oldState.channel;
+    if (!voiceChannel) return;
 
     const textChannel = getVoiceChannelTextChat(voiceChannel);
-    if (!textChannel) {
-      console.log('❌ Associated text channel not found');
-      console.log(`   Looking for text channel with name: ${voiceChannel.name}`);
-      console.log(`   In category: ${voiceChannel.parentId || 'no category'}`);
-      return;
+    if (!textChannel) return;
+
+    // Find the latest session embed sent by the bot
+    const lastSessionMsg = await findLatestEmbedByUser(textChannel, textChannel.client.user!.id);
+    const expired = isSessionExpired(lastSessionMsg);
+
+    // Determine join/leave
+    const joined = !!newState.channel && !oldState.channel;
+    const left = !!oldState.channel && !newState.channel;
+
+    // Handle join event
+    if (joined) {
+      // Check if the channel was empty before this user joined
+      const otherMembers = newState.channel!.members.filter(m => m.id !== newState.id && !m.user.bot);
+      const channelWasEmpty = otherMembers.size === 0;
+      if (channelWasEmpty) {
+        // Start a new session: send a new embed message
+        const fields = [makeJoinField(member.id, new Date())];
+        const embed = buildSessionEmbed(voiceChannel.name, fields);
+        await sendEmbedMessage(textChannel, embed);
+        return;
+      }
     }
-    console.log(`   Text channel found: ${textChannel.name} (${textChannel.id})`);
 
-    // Get current member count in the voice channel
-    const currentMemberCount = voiceChannel.members.size;
-    console.log(`   Current member count: ${currentMemberCount}`);
+    // Build or update embed fields for join/leave
+    const fields = (lastSessionMsg?.embeds[0]?.fields?.map(f => ({ name: f.name, value: f.value, inline: f.inline ?? false })) || []);
+    if (joined) {
+      fields.push(makeJoinField(member.id, new Date()));
+    } else if (left) {
+      fields.push(makeLeaveField(member.id, new Date()));
+    }
 
-    // Find the last vc-notify message in this text channel
-    console.log('🔍 Fetching recent messages...');
-    const messages = await textChannel.messages.fetch({ limit: 50 });
-    const lastVcNotifyMessage = messages.find(msg => isVcNotifyMessage(msg));
-    
-    if (lastVcNotifyMessage) {
-      console.log(`   Last vc-notify message found: ${lastVcNotifyMessage.id} (${new Date(lastVcNotifyMessage.createdTimestamp).toISOString()})`);
+    // Create or update embed
+    const embed = buildSessionEmbed(voiceChannel.name, fields);
+    if (expired || !lastSessionMsg) {
+      await sendEmbedMessage(textChannel, embed);
     } else {
-      console.log('   No previous vc-notify messages found');
-    }
-
-    // If this is the first person joining (member count = 1), send a green embed
-    // Otherwise, send a grey embed
-    const memberId = newState.member?.id || 'UnknownUser';
-    if (currentMemberCount === 1) {
-      const embed = createVoiceJoinEmbed(
-        memberId,
-        voiceChannel.name
-      );
-      await textChannel.send({ embeds: [embed] });
-      console.log('🟩 Sent session start (green) embed');
-    } else {
-      const embed = createSecondaryJoinEmbed(
-        memberId
-      );
-      await textChannel.send({ embeds: [embed] });
-      console.log('⬜ Sent secondary join (grey) embed');
-    }
-  } else {
-    console.log('⏭️  Not a join event, skipping');
-  }
-}
-
-export default {
-  once: false,
-
-  async run(_client: any, oldState: VoiceState, newState: VoiceState) {
-    if (!isChannelChange(oldState, newState)) {
-      return;
-    }
-
-    try {
-      await handleVoiceChannelUpdate(oldState, newState);
-    } catch (error) {
-      console.error('❌ Error handling voice state update:', error);
+      await updateEmbedMessage(lastSessionMsg, embed);
     }
   },
 }; 

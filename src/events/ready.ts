@@ -1,19 +1,15 @@
-import { Client } from 'discord.js';
-
-interface ExtendedClient extends Client {
-  commands: any;
-}
+import { Events } from 'discord.js';
+import { ExtendedClient } from '../types';
 
 export default {
+  name: Events.ClientReady,
   once: true,
 
   /**
    * @param client Discord Client
    */
-  async run(client: ExtendedClient) {
+  async execute(client: ExtendedClient) {
     console.log(`Logged in as ${client.user!.tag}`);
-
-    const slashCommandData = client.commands.map((v: any) => v.slash);
-    await client.application!.commands.set(slashCommandData);
+    // No commands to register since we removed all commands
   },
 }; 

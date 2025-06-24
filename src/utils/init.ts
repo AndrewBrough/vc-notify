@@ -7,16 +7,8 @@ function ensureDirectoryExists(dirPath: string): void {
   }
 }
 
-function initializeDataFile(filename: string, defaultContent: any): void {
-  const filePath = path.join(__dirname, '..', '..', 'data', filename);
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultContent, null, '\t'));
-  }
-}
-
 export function initializeDataDirectory(): void {
   const dataDir = path.join(__dirname, '..', '..', 'data');
   ensureDirectoryExists(dataDir);
-  // Initialize guild.json
-  initializeDataFile('guild.json', {});
+  // No files to initialize currently
 } 
