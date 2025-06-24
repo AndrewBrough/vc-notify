@@ -18,11 +18,6 @@ function initializeDataDirectory() {
     const dataDir = path.join(__dirname, '..', 'data');
     ensureDirectoryExists(dataDir);
 
-    // Initialize config.json
-    initializeDataFile('config.json', {
-        token: ''
-    });
-
     // Initialize guild.json
     initializeDataFile('guild.json', {});
 }

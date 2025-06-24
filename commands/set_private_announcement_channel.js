@@ -1,18 +1,29 @@
 const { SlashCommandBuilder, PermissionFlagsBits, Client, ChatInputCommandInteraction } = require("discord.js")
 const { errorEmbed, writeJSON, successEmbed, readJSON } = require("../functions")
 
+/**
+ * Checks if a channel is private (not visible to @everyone)
+ * @param {GuildChannel} channel - The channel to check
+ * @returns {boolean} Whether the channel is private
+ */
+function isPrivateChannel(channel) {
+	if (!channel) return false;
+	const everyoneRole = channel.guild.roles.everyone;
+	return !channel.permissionsFor(everyoneRole).has(PermissionFlagsBits.ViewChannel);
+}
+
 module.exports = {
 	slash: new SlashCommandBuilder()
-		.setName("set_announcement_channel")
-		.setDescription("Sets the VC announcement channel to #channel")
+		.setName("set_private_channel")
+		.setDescription("Sets the private VC announcement channel to #channel (Admin only)")
 		.addChannelOption(channel =>
 			channel
 				.setName("channel")
-				.setDescription("The channel to announce new VC sessions in")
+				.setDescription("The channel to announce private VC sessions in (must be private)")
 				.setRequired(true)
 		)
 		.setDMPermission(false)
-		.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
 	/**
 	 * @param {Client} client
@@ -20,6 +31,14 @@ module.exports = {
 	 */
 	async run(client, interaction) {
 		const channel = interaction.options.getChannel("channel", true)
+
+		// Check if the channel is actually private
+		if (!isPrivateChannel(channel)) {
+			const embed = errorEmbed()
+				.setDescription(`${channel} is not a private channel. Private announcement channels must not be visible to @everyone.`)
+
+			return interaction.reply({ embeds: [embed], ephemeral: true })
+		}
 
 		const missingPermissions = []
 
@@ -41,10 +60,10 @@ module.exports = {
 			writeJSON("./data/guild.json", interaction.guild.id, {})
 		}
 
-		writeJSON("./data/guild.json", `${interaction.guild.id}.announcement_channel`, channel.id)
+		writeJSON("./data/guild.json", `${interaction.guild.id}.private_announcement_channel`, channel.id)
 
 		const embed = successEmbed()
-			.setDescription(`Successfully set the VC announcement channel to ${channel}.`)
+			.setDescription(`Successfully set the private VC announcement channel to ${channel}.`)
 
 		interaction.reply({ embeds: [embed] })
 	}

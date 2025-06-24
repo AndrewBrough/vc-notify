@@ -1,56 +1,105 @@
-# Setup
-## Node.JS
-Since this bot uses Node.JS you will need to download and install Node.JS from [the official Node.JS website](https://nodejs.org/en/).
+# Voice Channel New Session Announcer
 
-## Deploying
+A Discord bot that announces when users join voice channels, with support for separate public and private channel announcements.
 
-You can run this on a server using `npm run start`. It'll automatically connect assuming you've configured your bot token in the `.env` file.
+## Features
 
-## Creating A Bot
-To create a bot go to the [Discord Developer Portal](https://discord.com/developers/applications) and then click the **New Application** button at the top right.
+- **Public Voice Channels**: Announce when users join public voice channels
+- **Private Voice Channels**: Separate announcements for private voice channels
+- **Channel Validation**: Ensures private announcement channels are actually private
+- **Simple Setup**: Easy configuration with slash commands
 
-Once Discord asks for the application name type in whatever you want the name to be and then accept the Developer ToS agreement.
+## Setup
 
-After clicking **Create** Discord should take you to the application page, at the middle left click **Bot** and then click **Add Bot**, Discord will ask if you're sure, click **Yes, do it!**.
+### Prerequisites
+- Node.js (v16 or higher)
+- Discord Bot Token
 
-## Inviting The Bot
-To do this you'll need to click **OAuth2** at the middle left of the page.
+### Installation
 
-Once you're at the **OAuth2** page, under **Scopes** check **bot** and **applications.commands**.
-You should now see a big **Bot Permissions** box at the bottom of the **Scopes** box, under the **Bot Permissions** box you'll want to check **Read Messages/View Channels**, **Send Messages** and **Mention Everyone**.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd Voice-Channel-New-Session-Announcer
+   ```
 
-You should then see **Generated URL** at the bottom of the **Bot Permissions** box, click **Copy** and then paste the URL in a new tab.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-On **Add To Server** select the server you want to add it to then click **Continue**.
-Afterwards Discord will show you the permissions you've given the bot, click **Authorise**.
+3. **Create environment file**
+   Create a `.env` file in the root directory:
+   ```
+   DISCORD_BOT_TOKEN=your_bot_token_here
+   ```
 
-Now close the tab and then go back to the applications Developer Portal, you'll need to go back to it to get the bot token.
+4. **Run the bot**
+   ```bash
+   npm start
+   ```
 
-## Getting The Bot Token
-If you're still on the **OAuth2** page click the **Bot** tab at the middle left.
+## Bot Setup
 
-Click **Reset Token** and then copy the new long text.
-You may need to go through 2FA if you have 2FA enabled.
+### Creating a Discord Bot
 
-## Setting Up VC New Session Announcer
-Now that you have the token, create a `.env` file in the root directory of the project and add the following line:
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
+2. Click "New Application" and give it a name
+3. Go to the "Bot" section and click "Add Bot"
+4. Copy the bot token and add it to your `.env` file
+
+### Required Bot Permissions
+
+- **View Channels**
+- **Send Messages** 
+- **Mention Everyone**
+- **Use Slash Commands**
+
+### Inviting the Bot
+
+Use this URL (replace `YOUR_BOT_ID` with your actual bot ID):
 ```
-DISCORD_BOT_TOKEN=your_token_here
+https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=274877910016&scope=bot%20applications.commands
 ```
-Replace `your_token_here` with the bot token you copied from Discord.
 
-Open command prompt, konsole, or whichever terminal application you use in the root folder (root folder = folder that contains the **index.js** file) and then type **npm i**, this will install packages.
-Once the packages have installed type **node index.js**.
+## Commands
 
-The bot will automatically create a `data` directory with the necessary configuration files on first run.
+### Setup Commands
+- `/set_announcement_channel #channel` - Set public voice channel announcements (Manage Messages)
+- `/set_private_channel #channel` - Set private voice channel announcements (Admin only)
+- `/show_channels` - View current announcement channel settings (Admin only)
 
-If everything goes well, you should see **Connected to <bot_tag>** in your terminal.
+### Management Commands
+- `/remove_announcement_channel` - Remove public announcement channel (Manage Messages)
+- `/remove_private_channel` - Remove private announcement channel (Admin only)
 
-Now you can go to the server you added the bot to and then type **/set_announcement_channel #channel** to setup an announcement channel.
+## How It Works
+
+- **Public Voice Channels**: When someone joins a public voice channel, the bot sends a message to the configured public announcement channel
+- **Private Voice Channels**: When someone joins a private voice channel, the bot sends a message to the configured private announcement channel
+- **Channel Validation**: The bot ensures private announcement channels are actually private (not visible to @everyone)
+
+## Example Messages
+
+- **Public**: `"John joined General at 2:30 PM"`
+- **Private**: `"John joined private Staff Room at 2:30 PM"`
+
+## Project Structure
+
+```
+├── commands/          # Slash command handlers
+├── events/           # Discord event handlers
+├── utils/            # Utility functions
+├── data/             # Guild configuration data
+├── functions.js      # Shared utility functions
+├── index.js          # Bot entry point
+└── package.json      # Dependencies and scripts
+```
 
 ## Notes
-This bot uses JSON files to store announcement channel data, if you'd like to use something such as MongoDB, look into setting up an npm package such as Mongoose.
 
-Since this is designed to be used in small/private servers I decided not to use Mongoose since it'd require more setup on the users side.
+This bot uses JSON files to store guild configuration data. For production use with many servers, consider using a proper database like MongoDB or PostgreSQL.
 
-**If you do plan on using this on many servers I highly recommend looking into proper databases, JSON files aren't designed to handle a lot of read and write operations and may corrupt**.
+## License
+
+This project is open source and available under the MIT License.
