@@ -1,5 +1,5 @@
 const { Client, VoiceState, PermissionFlagsBits } = require("discord.js");
-const { readJSON, successEmbed } = require("../functions");
+const { readJSON } = require("../functions");
 
 /**
  * Checks if a channel is private (not visible to @everyone)
@@ -29,23 +29,15 @@ function isChannelChange(oldState, newState) {
  * @param {TextChannel} announcementChannel - The channel to send announcements to
  */
 async function handlePublicChannelUpdate(oldState, newState, announcementChannel) {
-  // Only announce when someone joins a channel
   if (newState.channel && oldState.channelId !== newState.channelId) {
     const joinTime = new Date().toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 
     });
-    
-    const embed = successEmbed()
-      .setTitle(`${newState.member.displayName} joined the voice chat`)
-      .setDescription(`${newState.channel}`)
-      .addFields({ name: "Time", value: joinTime });
-
-    await announcementChannel.send({ 
-      content: `${newState.member.displayName} joined ${newState.channel.name} at ${joinTime}`,
-      embeds: [embed] 
-    });
+    await announcementChannel.send(
+      `${newState.member.displayName} joined ${newState.channel.name} at ${joinTime}`
+    );
   }
 }
 
@@ -56,23 +48,15 @@ async function handlePublicChannelUpdate(oldState, newState, announcementChannel
  * @param {TextChannel} announcementChannel - The channel to send announcements to
  */
 async function handlePrivateChannelUpdate(oldState, newState, announcementChannel) {
-  // Only announce when someone joins a channel
   if (newState.channel && oldState.channelId !== newState.channelId) {
     const joinTime = new Date().toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 
     });
-    
-    const embed = successEmbed()
-      .setTitle(`${newState.member.displayName} joined the private voice chat`)
-      .setDescription(`${newState.channel}`)
-      .addFields({ name: "Time", value: joinTime });
-
-    await announcementChannel.send({ 
-      content: `${newState.member.displayName} joined private ${newState.channel.name} at ${joinTime}`,
-      embeds: [embed] 
-    });
+    await announcementChannel.send(
+      `${newState.member.displayName} joined private ${newState.channel.name} at ${joinTime}`
+    );
   }
 }
 
