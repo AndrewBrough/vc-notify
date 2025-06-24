@@ -35,6 +35,25 @@ export function writeJSON(filePath: string, dataPath: string, data: any): void {
   writeFileSync(filePath, newJSON);
 }
 
+export function formatTime(date: Date = new Date(), timezone: string = 'America/New_York'): string {
+  try {
+    return date.toLocaleTimeString('en-US', {
+      timeZone: timezone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  } catch (error) {
+    // Fallback to local time if timezone is invalid
+    console.warn(`Invalid timezone: ${timezone}, falling back to local time`);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+}
+
 export function successEmbed(): EmbedBuilder {
   return new EmbedBuilder().setColor(0x57f287);
 }
