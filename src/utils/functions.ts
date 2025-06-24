@@ -43,15 +43,6 @@ export function errorEmbed(): EmbedBuilder {
   return new EmbedBuilder().setColor(0xed4245);
 }
 
-export function createVoiceJoinEmbed(memberName: string, channelName: string): EmbedBuilder {
-  const embed = new EmbedBuilder()
-    .setColor(0x57f287) // Green color for join events
-    .setTitle(`🎤 ${memberName} joined ${channelName}`)
-    .setTimestamp()
-
-  return embed;
-}
-
 export function getVoiceChannelTextChat(voiceChannel: VoiceBasedChannel): TextChannel | null {
   if (!voiceChannel || !voiceChannel.guild) {
     console.log('❌ Voice channel or guild is null');
