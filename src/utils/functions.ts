@@ -65,4 +65,14 @@ export function isVcNotifyMessage(message: any): boolean {
          message.embeds[0]?.title?.includes('joined');
 }
 
-// All thread-related code has been removed. No other thread logic remains in this file. 
+export function createVoiceJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x57f287)
+    .setDescription(`🎤 <@${memberId}> joined ${channelName}`);
+}
+
+export function createSecondaryJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x747f8d)
+    .setDescription(`🎤 <@${memberId}> joined ${channelName}`);
+}

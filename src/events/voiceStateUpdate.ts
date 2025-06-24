@@ -1,5 +1,7 @@
-import { EmbedBuilder, VoiceBasedChannel, VoiceState } from 'discord.js';
+import { VoiceBasedChannel, VoiceState } from 'discord.js';
 import {
+  createSecondaryJoinEmbed,
+  createVoiceJoinEmbed,
   getVoiceChannelTextChat,
   isVcNotifyMessage
 } from '../utils/functions';
@@ -57,18 +59,19 @@ async function handleVoiceChannelUpdate(oldState: VoiceState, newState: VoiceSta
 
     // If this is the first person joining (member count = 1), send a green embed
     // Otherwise, send a grey embed
+    const memberId = newState.member?.id || 'UnknownUser';
     if (currentMemberCount === 1) {
-      const embed = new EmbedBuilder()
-        .setColor(0x57f287) // Green color for join events
-        .setTitle(`🎤 ${newState.member?.displayName} started a voice session`);
-
+      const embed = createVoiceJoinEmbed(
+        memberId,
+        voiceChannel.name
+      );
       await textChannel.send({ embeds: [embed] });
       console.log('🟩 Sent session start (green) embed');
     } else {
-      const embed = new EmbedBuilder()
-        .setColor(0x747f8d) // Grey color for secondary joins
-        .setDescription(`🎤 ${newState.member?.displayName} joined`);
-
+      const embed = createSecondaryJoinEmbed(
+        memberId,
+        voiceChannel.name
+      );
       await textChannel.send({ embeds: [embed] });
       console.log('⬜ Sent secondary join (grey) embed');
     }
