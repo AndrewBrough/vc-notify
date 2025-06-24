@@ -1,0 +1,33 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "dev",
+			"problemMatcher": [],
+			"label": "npm: dev",
+			"detail": "nodemon"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [],
+			"label": "npm: start",
+			"detail": "npm run build && pm2 start dist/index.js --name 'Voice Channel Logger'"
+		},
+		{
+			"type": "npm",
+			"script": "stop",
+			"problemMatcher": [],
+			"label": "npm: stop",
+			"detail": "pm2 stop 'Voice Channel Logger'"
+		},
+		{
+			"type": "npm",
+			"script": "restart",
+			"problemMatcher": [],
+			"label": "npm: restart",
+			"detail": "pm2 restart 'Voice Channel Logger'"
+		}
+	]
+}
