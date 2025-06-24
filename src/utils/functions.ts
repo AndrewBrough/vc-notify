@@ -1,4 +1,4 @@
-import { ChannelType, EmbedBuilder, TextChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel, VoiceBasedChannel } from 'discord.js';
 import { readFileSync, writeFileSync } from 'fs';
 
 export function readJSON(filePath: string): Record<string, any> {
@@ -52,17 +52,19 @@ export function createVoiceJoinEmbed(memberName: string, channelName: string): E
   return embed;
 }
 
-export function getVoiceChannelTextChat(voiceChannel: any): TextChannel | null {
-  if (!voiceChannel || !voiceChannel.guild) return null;
-  
-  // Find the text channel with the same name in the same category
-  const textChannel = voiceChannel.guild.channels.cache.find((channel: any) => 
-    channel.type === ChannelType.GuildText && 
-    channel.parentId === voiceChannel.parentId && 
-    channel.name === voiceChannel.name
-  ) as TextChannel;
-  
-  return textChannel || null;
+export function getVoiceChannelTextChat(voiceChannel: VoiceBasedChannel): TextChannel | null {
+  if (!voiceChannel || !voiceChannel.guild) {
+    console.log('❌ Voice channel or guild is null');
+    return null;
+  }
+  // Try to get the text chat by ID (Discord's new voice channel text chats have the same ID as the voice channel)
+  const textChannel = voiceChannel.guild.channels.cache.get(voiceChannel.id);
+  if (textChannel && textChannel.isTextBased()) {
+    console.log(`✅ Found voice channel text chat: ${textChannel.id}`);
+    return textChannel as TextChannel;
+  }
+  console.log('❌ No associated voice channel text chat found by ID');
+  return null;
 }
 
 export function isVcNotifyMessage(message: any): boolean {
