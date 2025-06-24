@@ -1,15 +1,30 @@
 {
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "pm2 start index.js --name 'Voice Channel Logger'",
+    "build": "tsc",
+    "dev": "nodemon",
+    "start": "npm run build && pm2 start dist/index.js --name 'Voice Channel Logger'",
     "stop": "pm2 stop 'Voice Channel Logger'",
-    "restart": "pm2 restart 'Voice Channel Logger'"
+    "restart": "pm2 restart 'Voice Channel Logger'",
+    "lint": "eslint src/**/*.ts --fix",
+    "lint:check": "eslint src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts"
   },
   "dependencies": {
     "discord.js": "^14.7.1",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.1",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.0",
+    "prettier-eslint-cli": "^8.0.0"
   }
 }

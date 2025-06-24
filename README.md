@@ -1,21 +1,16 @@
 # Voice Channel New Session Announcer
 
-A Discord bot that announces when users join voice channels, with support for separate public and private channel announcements.
+A Discord bot that announces when users join voice channels, with support for public and private channels.
 
 ## Features
 
-- **Public Voice Channels**: Announce when users join public voice channels
-- **Private Voice Channels**: Separate announcements for private voice channels
-- **Channel Validation**: Ensures private announcement channels are actually private
-- **Simple Setup**: Easy configuration with slash commands
+- **Public Channel Announcements**: Announce when users join public voice channels
+- **Private Channel Announcements**: Announce when users join private voice channels (admin-only setup)
+- **Multi-Server Support**: Works across multiple Discord servers
+- **Permission-Based Setup**: Different permission levels for public vs private channels
+- **TypeScript**: Built with TypeScript for better type safety and development experience
 
-## Setup
-
-### Prerequisites
-- Node.js (v16 or higher)
-- Discord Bot Token
-
-### Installation
+## Installation
 
 1. **Clone the repository**
    ```bash
@@ -28,78 +23,133 @@ A Discord bot that announces when users join voice channels, with support for se
    npm install
    ```
 
-3. **Create environment file**
+3. **Set up environment variables**
    Create a `.env` file in the root directory:
-   ```
-   DISCORD_BOT_TOKEN=your_bot_token_here
+   ```env
+   DISCORD_BOT_TOKEN=your_discord_bot_token_here
    ```
 
-4. **Run the bot**
+4. **Build the project**
    ```bash
-   npm start
+   npm run build
    ```
 
-## Bot Setup
+## Usage
 
-### Creating a Discord Bot
-
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and give it a name
-3. Go to the "Bot" section and click "Add Bot"
-4. Copy the bot token and add it to your `.env` file
-
-### Required Bot Permissions
-
-- **View Channels**
-- **Send Messages** 
-- **Mention Everyone**
-- **Use Slash Commands**
-
-### Inviting the Bot
-
-Use this URL (replace `YOUR_BOT_ID` with your actual bot ID):
+### Development
+```bash
+npm run dev          # Start development server with linting and type checking
 ```
-https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=274877910016&scope=bot%20applications.commands
+
+### Production
+```bash
+npm start            # Build and start with PM2
+```
+
+### PM2 Management
+```bash
+npm run stop         # Stop the bot
+npm run restart      # Restart the bot
+```
+
+### Code Quality
+```bash
+npm run lint         # Run ESLint with auto-fix
+npm run type-check   # Run TypeScript type checking
+npm run format       # Format code with Prettier
 ```
 
 ## Commands
 
-### Setup Commands
-- `/set_announcement_channel #channel` - Set public voice channel announcements (Manage Messages)
-- `/set_private_channel #channel` - Set private voice channel announcements (Admin only)
-- `/show_channels` - View current announcement channel settings (Admin only)
+### Public Channels (Manage Messages permission required)
+- `/set_announcement_channel #channel` - Set the announcement channel for public voice channels
+- `/remove_announcement_channel` - Remove the public announcement channel
 
-### Management Commands
-- `/remove_announcement_channel` - Remove public announcement channel (Manage Messages)
-- `/remove_private_channel` - Remove private announcement channel (Admin only)
+### Private Channels (Administrator permission required)
+- `/set_private_channel #channel` - Set the announcement channel for private voice channels (must be a private channel)
+- `/remove_private_channel` - Remove the private announcement channel
 
-## How It Works
+## Bot Permissions
 
-- **Public Voice Channels**: When someone joins a public voice channel, the bot sends a message to the configured public announcement channel
-- **Private Voice Channels**: When someone joins a private voice channel, the bot sends a message to the configured private announcement channel
-- **Channel Validation**: The bot ensures private announcement channels are actually private (not visible to @everyone)
+The bot requires the following permissions:
+- **View Channels** - To see voice channels and their states
+- **Send Messages** - To send announcements
+- **Mention @everyone** - To mention users in announcements
+- **Use Slash Commands** - To register and use slash commands
 
-## Example Messages
+## Inviting the Bot
 
-- **Public**: `"John joined General at 2:30 PM"`
-- **Private**: `"John joined private Staff Room at 2:30 PM"`
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
+2. Select your application
+3. Go to OAuth2 > URL Generator
+4. Select the following scopes:
+   - `bot`
+   - `applications.commands`
+5. Select the following bot permissions:
+   - View Channels
+   - Send Messages
+   - Mention Everyone
+   - Use Slash Commands
+6. Use the generated URL to invite the bot to your server
 
-## Project Structure
+## Troubleshooting
 
+### Bot Can't See a Channel
+If the bot can't see a channel you're trying to set as an announcement channel:
+1. Check that the bot has the "View Channel" permission for that channel
+2. Ensure the bot's role is above the channel's permission overwrites
+3. Verify the bot has the necessary permissions at the server level
+
+### Duplicate Announcements
+If you're seeing duplicate announcements:
+1. Check if multiple bot instances are running
+2. Use `pm2 list` to see running processes
+3. Stop any duplicate instances with `pm2 stop <process-name>`
+
+## Development
+
+### Project Structure
 ```
+src/
 ├── commands/          # Slash command handlers
-├── events/           # Discord event handlers
-├── utils/            # Utility functions
-├── data/             # Guild configuration data
-├── functions.js      # Shared utility functions
-├── index.js          # Bot entry point
-└── package.json      # Dependencies and scripts
+├── events/            # Discord event handlers
+├── utils/             # Utility functions
+├── types/             # TypeScript type definitions
+├── services/          # Business logic services
+└── config/            # Configuration files
 ```
 
-## Notes
+### TypeScript Configuration
+The project uses a modern TypeScript configuration with:
+- **Strict type checking** for better runtime safety
+- **Path aliases** for cleaner imports (`@/utils/functions`)
+- **Modern ES2021 target** for better performance
+- **Source maps** for debugging
 
-This bot uses JSON files to store guild configuration data. For production use with many servers, consider using a proper database like MongoDB or PostgreSQL.
+### Code Quality Tools
+- **ESLint** with TypeScript support for code quality
+- **Prettier** for consistent code formatting
+- **TypeScript** for type safety and IntelliSense
+
+### Development Workflow
+The development server (`npm run dev`) automatically:
+1. Runs ESLint to check code quality
+2. Performs TypeScript type checking
+3. Starts the bot with hot reloading
+
+## Future Improvements
+
+### Code Optimization Opportunities
+- **Permission validation**: Create reusable utility functions for channel permission checks
+- **Response patterns**: Standardize error/success response handling
+- **Type safety**: Replace `any` types with proper interfaces
+- **Error handling**: Implement centralized error handling and logging
+
+### Performance Enhancements
+- **Caching**: Implement guild data caching
+- **Rate limiting**: Add command rate limiting
+- **Database**: Consider migrating from JSON files to a proper database
 
 ## License
 
-This project is open source and available under the MIT License.
+This project is licensed under the MIT License.
