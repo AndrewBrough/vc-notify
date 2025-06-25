@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, Events, Interaction } from 'discord.js';
 import changeVcNotifyRole from '../commands/changeVcNotifyRole';
-import { ExtendedClient } from '../types';
+import setSessionStartMessage from '../commands/setSessionStartMessage';
 
 interface Command {
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
@@ -8,14 +8,12 @@ interface Command {
 
 const commands: Record<string, Command> = {
   'change-vc-notify-role': changeVcNotifyRole,
+  'set-session-start-message': setSessionStartMessage,
 };
 
 export default {
   name: Events.InteractionCreate,
-  async execute(
-    _client: ExtendedClient,
-    interaction: Interaction
-  ): Promise<void> {
+  async execute(interaction: Interaction): Promise<void> {
     if (!interaction.isChatInputCommand()) return;
 
     const command = commands[interaction.commandName];
