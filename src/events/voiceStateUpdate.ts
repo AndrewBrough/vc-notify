@@ -1,10 +1,16 @@
-import { Events, VoiceState } from 'discord.js';
+import {
+  Events,
+  GuildMember,
+  Message,
+  TextChannel,
+  VoiceBasedChannel,
+  VoiceState,
+} from 'discord.js';
 import { getVoiceChannelTextChat } from '../discord/channels';
 import {
   buildDescriptionFromUserLines,
   buildSessionEmbed,
   getNotifyRoleMention,
-  makeJoinOrLeaveLine,
   parseUserLines,
   updateUserLine,
 } from '../discord/embeds';
@@ -71,21 +77,23 @@ function isChannelEmpty(newState: VoiceState): boolean {
 }
 
 async function startNewSession(
-  voiceChannel: any,
-  member: any,
+  voiceChannel: VoiceBasedChannel,
+  member: GuildMember,
   now: Date,
-  textChannel: any
+  textChannel: TextChannel
 ): Promise<void> {
   const roleMention = getNotifyRoleMention(voiceChannel.guild);
-  const description = makeJoinOrLeaveLine(member.id, now, 'join');
-  const embed = buildSessionEmbed(voiceChannel.name, description, roleMention);
-  await sendEmbedMessage(textChannel, embed);
+  console.log('roleMention', roleMention);
+  const userLines = updateUserLine({}, member.id, now, 'join');
+  const description = buildDescriptionFromUserLines(userLines, roleMention);
+  const embed = buildSessionEmbed(voiceChannel.name, description);
+  await sendEmbedMessage(textChannel, embed, roleMention);
 }
 
 async function updateExistingSession(
-  lastSessionMsg: any,
-  voiceChannel: any,
-  member: any,
+  lastSessionMsg: Message | undefined,
+  voiceChannel: VoiceBasedChannel,
+  member: GuildMember,
   joined: boolean,
   left: boolean,
   now: Date

@@ -5,9 +5,14 @@ import { EmbedBuilder, Message, TextChannel } from 'discord.js';
  */
 export async function sendEmbedMessage(
   channel: TextChannel,
-  embed: EmbedBuilder
+  embed: EmbedBuilder,
+  content?: string
 ): Promise<Message> {
-  return channel.send({ embeds: [embed] });
+  if (content) {
+    return channel.send({ content, embeds: [embed] });
+  } else {
+    return channel.send({ embeds: [embed] });
+  }
 }
 
 /**

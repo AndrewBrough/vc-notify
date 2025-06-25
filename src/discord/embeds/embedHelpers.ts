@@ -41,21 +41,26 @@ export function updateUserLine(
 }
 
 export function buildDescriptionFromUserLines(
-  userLines: Record<string, string>
+  userLines: Record<string, string>,
+  roleMention?: string
 ): string {
-  return Object.values(userLines).join('\n');
+  const userLinesText = Object.values(userLines).join('\n');
+
+  // Add role mention at the top if provided
+  if (roleMention) {
+    return `${roleMention}\n\n${userLinesText}`;
+  }
+
+  return userLinesText;
 }
 
 export function buildSessionEmbed(
   channelName: string,
-  description: string,
-  roleMention?: string
+  description: string
 ): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
-    .setTitle(
-      `🎤 Voice session started in ${channelName}${roleMention ? ' ' + roleMention : ''}`
-    )
+    .setTitle(`🎤 Voice session started in ${channelName}`)
     .setDescription(description);
 }
 
@@ -74,20 +79,4 @@ export function isVcNotifyMessage(message: Message): boolean {
     message.embeds?.length > 0 &&
     message.embeds[0]?.title?.includes('joined')
   );
-}
-
-export function createVoiceJoinEmbed(
-  memberId: string,
-  channelName: string
-): EmbedBuilder {
-  return new EmbedBuilder()
-    .setColor(0x57f287)
-    .setTitle(`🎤 Voice session started in ${channelName}`)
-    .setFields([{ name: memberId, value: `is here!` }]);
-}
-
-export function createSecondaryJoinEmbed(memberId: string): EmbedBuilder {
-  return new EmbedBuilder()
-    .setColor(0x747f8d)
-    .setDescription(`<@${memberId}> is here`);
 }
