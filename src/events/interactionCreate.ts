@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, Events, Interaction } from 'discord.js';
 import changeVcNotifyRole from '../commands/changeVcNotifyRole';
 import setSessionStartMessage from '../commands/setSessionStartMessage';
+import { registerCommands } from '../utils/commandRegistration';
 
 interface Command {
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
@@ -21,6 +22,7 @@ export default {
 
     try {
       await command.execute(interaction);
+      await tryRegisterCommands(interaction);
     } catch (error) {
       console.error(
         `Error executing command ${interaction.commandName}:`,
@@ -30,6 +32,25 @@ export default {
     }
   },
 };
+
+async function tryRegisterCommands(interaction: Interaction): Promise<void> {
+  try {
+    const clientId = interaction.client.user?.id;
+    const token = process.env.DISCORD_BOT_TOKEN;
+    if (clientId && token) {
+      await registerCommands(clientId, token);
+    } else {
+      console.warn(
+        'Client ID or bot token not set; skipping command registration.'
+      );
+    }
+  } catch (error) {
+    console.error(
+      'Error re-registering commands after command execution:',
+      error
+    );
+  }
+}
 
 async function sendErrorResponse(
   interaction: ChatInputCommandInteraction
