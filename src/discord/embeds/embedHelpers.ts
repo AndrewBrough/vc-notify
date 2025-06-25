@@ -41,15 +41,9 @@ export function updateUserLine(
 }
 
 export function buildDescriptionFromUserLines(
-  userLines: Record<string, string>,
-  roleMention?: string
+  userLines: Record<string, string>
 ): string {
   const userLinesText = Object.values(userLines).join('\n');
-
-  // Add role mention at the top if provided
-  if (roleMention) {
-    return `${roleMention}\n\n${userLinesText}`;
-  }
 
   return userLinesText;
 }

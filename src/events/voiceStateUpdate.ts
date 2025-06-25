@@ -83,9 +83,8 @@ async function startNewSession(
   textChannel: TextChannel
 ): Promise<void> {
   const roleMention = getNotifyRoleMention(voiceChannel.guild);
-  console.log('roleMention', roleMention);
   const userLines = updateUserLine({}, member.id, now, 'join');
-  const description = buildDescriptionFromUserLines(userLines, roleMention);
+  const description = buildDescriptionFromUserLines(userLines);
   const embed = buildSessionEmbed(voiceChannel.name, description);
   await sendEmbedMessage(textChannel, embed, roleMention);
 }
