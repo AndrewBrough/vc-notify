@@ -23,7 +23,6 @@ import {
 
 function getSessionStartMessage(
   guildId: string,
-  channelName: string,
   roleMention: string | undefined
 ): string {
   const DATA_FILE = './data/sessionStartMessages.json';
@@ -36,9 +35,7 @@ function getSessionStartMessage(
     customMessage = map[guildId];
   }
   if (customMessage) {
-    return customMessage
-      .replace('{channel}', channelName)
-      .replace('{role}', roleMention ?? '');
+    return customMessage;
   }
   return `🎤 Voice session started! ${roleMention ?? ''}`.trim();
 }
@@ -101,11 +98,7 @@ async function startNewSession(
   const roleMention = getNotifyRoleMention(voiceChannel.guild);
   const userLines = updateUserLine({}, member.id, now, 'join');
   const description = buildDescriptionFromUserLines(userLines);
-  const content = getSessionStartMessage(
-    voiceChannel.guild.id,
-    voiceChannel.name,
-    roleMention
-  );
+  const content = getSessionStartMessage(voiceChannel.guild.id, roleMention);
   const embed = buildSessionEmbed(description);
   await sendEmbedMessage(textChannel, embed, content);
 }

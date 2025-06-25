@@ -16,13 +16,13 @@ export default {
   data: new SlashCommandBuilder()
     .setName('set-session-start-message')
     .setDescription(
-      'Set the custom message for session start. Supports {channel} and {role} placeholders.'
+      'Set the session start message. Use @role and #channel for mentions.'
     )
     .addStringOption((option) =>
       option
         .setName('message')
         .setDescription(
-          'Custom message (use {channel} and {role} for placeholders)'
+          'Custom message (Discord mentions like @role and #channel are supported)'
         )
         .setRequired(true)
         .setMaxLength(200)
@@ -34,7 +34,7 @@ export default {
     map[interaction.guild.id] = message;
     writeMessageMap(map);
     await interaction.reply({
-      content: `✅ Session start message set to:\n${message}`,
+      content: `✅ Session start message set to:\n${message}\n(Mentions will work as in normal Discord messages.)`,
       ephemeral: true,
     });
   },
