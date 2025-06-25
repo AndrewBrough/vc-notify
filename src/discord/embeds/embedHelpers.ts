@@ -5,18 +5,42 @@ export function formatDiscordTimestamp(date: Date): string {
   return `<t:${Math.floor(date.getTime() / 1000)}:t>`;
 }
 
-export function makeJoinOrLeaveField(memberId: string, displayName: string, time: Date, type: 'join' | 'leave') {
+export function makeJoinOrLeaveLine(memberId: string, time: Date, type: 'join' | 'leave') {
   const emoji = type === 'join' ? '💚' : '💔';
-  return {
-    name: displayName,
-    value: `<@${memberId}> ${emoji} ${formatDiscordTimestamp(time)}`,
-    inline: false,
-  };
+  return `<@${memberId}> ${emoji} ${formatDiscordTimestamp(time)}`;
 }
 
-export function buildSessionEmbed(channelName: string, fields: { name: string; value: string; inline: boolean }[]): EmbedBuilder {
+export function parseUserLines(description: string | null | undefined): Record<string, string> {
+  // Returns a map of user mention to line
+  if (!description) return {};
+  const lines = description.split('\n');
+  const map: Record<string, string> = {};
+  for (const line of lines) {
+    const match = line.match(/^<@\d+>/);
+    if (match) {
+      map[match[0]] = line;
+    }
+  }
+  return map;
+}
+
+export function updateUserLine(
+  userLines: Record<string, string>,
+  memberId: string,
+  time: Date,
+  type: 'join' | 'leave'
+): Record<string, string> {
+  userLines[`<@${memberId}>`] = makeJoinOrLeaveLine(memberId, time, type);
+  return userLines;
+}
+
+export function buildDescriptionFromUserLines(userLines: Record<string, string>): string {
+  return Object.values(userLines).join('\n');
+}
+
+export function buildSessionEmbed(channelName: string, description: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
     .setTitle(`🎤 Voice session started in ${channelName}`)
-    .setFields(fields);
+    .setDescription(description);
 } 

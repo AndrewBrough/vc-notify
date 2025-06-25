@@ -1,8 +1,13 @@
 import { Events, VoiceState } from 'discord.js';
 import { getVoiceChannelTextChat } from '../discord/channels';
-import { buildSessionEmbed, makeJoinOrLeaveField } from '../discord/embeds';
+import {
+  buildDescriptionFromUserLines,
+  buildSessionEmbed,
+  makeJoinOrLeaveLine,
+  parseUserLines,
+  updateUserLine
+} from '../discord/embeds';
 import { findLatestEmbedByUser, sendEmbedMessage, updateEmbedMessage } from '../discord/messages';
-import { isSessionExpired } from '../discord/voiceState';
 
 // Main event handler for voice state updates
 export default {
@@ -19,11 +24,11 @@ export default {
 
     // Find the latest session embed sent by the bot
     const lastSessionMsg = await findLatestEmbedByUser(textChannel, textChannel.client.user!.id);
-    const expired = isSessionExpired(lastSessionMsg);
 
     // Determine join/leave
     const joined = !!newState.channel && !oldState.channel;
     const left = !!oldState.channel && !newState.channel;
+    const now = new Date();
 
     // Handle join event
     if (joined) {
@@ -32,38 +37,25 @@ export default {
       const channelWasEmpty = otherMembers.size === 0;
       if (channelWasEmpty) {
         // Start a new session: send a new embed message
-        const fields = [makeJoinOrLeaveField(member.id, member.displayName, new Date(), 'join')];
-        const embed = buildSessionEmbed(voiceChannel.name, fields);
+        const description = makeJoinOrLeaveLine(member.id, now, 'join');
+        const embed = buildSessionEmbed(voiceChannel.name, description);
         await sendEmbedMessage(textChannel, embed);
         return;
       }
     }
 
-    // Build or update embed fields for join/leave
-    const fields = (lastSessionMsg?.embeds[0]?.fields?.map(f => ({ name: f.name, value: f.value, inline: f.inline ?? false })) || []);
-    const userFieldIndex = fields.findIndex(f => f.name === member.displayName);
-    const now = new Date();
+    // Parse and update user lines in the description
+    let userLines = parseUserLines(lastSessionMsg?.embeds[0]?.description);
     if (joined) {
-      const newField = makeJoinOrLeaveField(member.id, member.displayName, now, 'join');
-      if (userFieldIndex !== -1) {
-        fields[userFieldIndex] = newField;
-      } else {
-        fields.push(newField);
-      }
+      userLines = updateUserLine(userLines, member.id, now, 'join');
     } else if (left) {
-      const newField = makeJoinOrLeaveField(member.id, member.displayName, now, 'leave');
-      if (userFieldIndex !== -1) {
-        fields[userFieldIndex] = newField;
-      } else {
-        fields.push(newField);
-      }
+      userLines = updateUserLine(userLines, member.id, now, 'leave');
     }
+    const description = buildDescriptionFromUserLines(userLines);
 
-    // Create or update embed
-    const embed = buildSessionEmbed(voiceChannel.name, fields);
-    if (expired || !lastSessionMsg) {
-      await sendEmbedMessage(textChannel, embed);
-    } else {
+    // Always update the last session message (never send a new one unless starting a new session)
+    if (lastSessionMsg) {
+      const embed = buildSessionEmbed(voiceChannel.name, description);
       await updateEmbedMessage(lastSessionMsg, embed);
     }
   },
