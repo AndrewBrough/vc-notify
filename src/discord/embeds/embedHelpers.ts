@@ -65,14 +65,8 @@ export function buildDescriptionFromUserLines(
   return userLinesText;
 }
 
-export function buildSessionEmbed(
-  channelName: string,
-  description: string
-): EmbedBuilder {
-  return new EmbedBuilder()
-    .setColor(0x57f287)
-    .setTitle(`🎤 Voice session started in ${channelName}`)
-    .setDescription(description);
+export function buildSessionEmbed(description: string): EmbedBuilder {
+  return new EmbedBuilder().setColor(0x57f287).setDescription(description);
 }
 
 export function successEmbed(): EmbedBuilder {

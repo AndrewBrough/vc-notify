@@ -6,6 +6,7 @@ import {
   VoiceBasedChannel,
   VoiceState,
 } from 'discord.js';
+import { existsSync, readFileSync } from 'fs';
 import { getVoiceChannelTextChat } from '../discord/channels';
 import {
   buildDescriptionFromUserLines,
@@ -19,6 +20,28 @@ import {
   sendEmbedMessage,
   updateEmbedMessage,
 } from '../discord/messages';
+
+function getSessionStartMessage(
+  guildId: string,
+  channelName: string,
+  roleMention: string | undefined
+): string {
+  const DATA_FILE = './data/sessionStartMessages.json';
+  let customMessage: string | undefined;
+  if (existsSync(DATA_FILE)) {
+    const map = JSON.parse(readFileSync(DATA_FILE, 'utf-8')) as Record<
+      string,
+      string
+    >;
+    customMessage = map[guildId];
+  }
+  if (customMessage) {
+    return customMessage
+      .replace('{channel}', channelName)
+      .replace('{role}', roleMention ?? '');
+  }
+  return `🎤 Voice session started! ${roleMention ?? ''}`.trim();
+}
 
 // Main event handler for voice state updates
 export default {
@@ -59,14 +82,7 @@ async function handleVoiceStateUpdate(
     return;
   }
 
-  await updateExistingSession(
-    lastSessionMsg,
-    voiceChannel,
-    member,
-    joined,
-    left,
-    now
-  );
+  await updateExistingSession(lastSessionMsg, member, joined, left, now);
 }
 
 function isChannelEmpty(newState: VoiceState): boolean {
@@ -85,13 +101,17 @@ async function startNewSession(
   const roleMention = getNotifyRoleMention(voiceChannel.guild);
   const userLines = updateUserLine({}, member.id, now, 'join');
   const description = buildDescriptionFromUserLines(userLines);
-  const embed = buildSessionEmbed(voiceChannel.name, description);
-  await sendEmbedMessage(textChannel, embed, roleMention);
+  const content = getSessionStartMessage(
+    voiceChannel.guild.id,
+    voiceChannel.name,
+    roleMention
+  );
+  const embed = buildSessionEmbed(description);
+  await sendEmbedMessage(textChannel, embed, content);
 }
 
 async function updateExistingSession(
   lastSessionMsg: Message | undefined,
-  voiceChannel: VoiceBasedChannel,
   member: GuildMember,
   joined: boolean,
   left: boolean,
@@ -108,6 +128,6 @@ async function updateExistingSession(
   }
 
   const description = buildDescriptionFromUserLines(userLines);
-  const embed = buildSessionEmbed(voiceChannel.name, description);
+  const embed = buildSessionEmbed(description);
   await updateEmbedMessage(lastSessionMsg, embed);
 }
