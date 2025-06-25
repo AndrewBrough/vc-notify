@@ -5,6 +5,7 @@
     "start": "npm run build && pm2 start dist/index.js --name 'Voice Channel Logger'",
     "stop": "pm2 stop 'Voice Channel Logger'",
     "restart": "pm2 restart 'Voice Channel Logger'",
+    "logs": "pm2 logs 'Voice Channel Logger' --lines 20 --nostream",
     "lint": "eslint src/**/*.ts --fix",
     "lint:check": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
