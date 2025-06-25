@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, Message } from 'discord.js';
 
 export function formatDiscordTimestamp(date: Date): string {
   // Only show the time (e.g., 7:36 PM)
@@ -38,9 +38,39 @@ export function buildDescriptionFromUserLines(userLines: Record<string, string>)
   return Object.values(userLines).join('\n');
 }
 
-export function buildSessionEmbed(channelName: string, description: string): EmbedBuilder {
+export function buildSessionEmbed(channelName: string, description: string, roleMention?: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x57f287)
+    .setTitle(`🎤 Voice session started in ${channelName}${roleMention ? ' ' + roleMention : ''}`)
+    .setDescription(description);
+}
+
+export function successEmbed(): EmbedBuilder {
+  return new EmbedBuilder().setColor(0x57f287);
+}
+
+export function errorEmbed(): EmbedBuilder {
+  return new EmbedBuilder().setColor(0xed4245);
+}
+
+export function isVcNotifyMessage(message: Message): boolean {
+  // Check if this is a vc-notify message by looking for our embed pattern
+  return !!(message.author?.bot && 
+         message.embeds?.length > 0 && 
+         message.embeds[0]?.title?.includes('joined'));
+}
+
+export function createVoiceJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
     .setTitle(`🎤 Voice session started in ${channelName}`)
-    .setDescription(description);
+    .setFields([
+      { name: memberId, value: `is here!` }
+    ]);
+}
+
+export function createSecondaryJoinEmbed(memberId: string): EmbedBuilder {
+  return new EmbedBuilder()
+    .setColor(0x747f8d)
+    .setDescription(`<@${memberId}> is here`);
 } 

@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
+import guildCreate from './events/guildCreate';
 import interactionCreate from './events/interactionCreate';
 import ready from './events/ready';
 import voiceStateUpdate from './events/voiceStateUpdate';
@@ -17,7 +18,7 @@ const client = new Client({
 }) as ExtendedClient;
 
 // Register events
-const events: Event[] = [ready, interactionCreate, voiceStateUpdate];
+const events: Event[] = [ready, interactionCreate, voiceStateUpdate, guildCreate];
 
 events.forEach(event => {
   if (event.once) {

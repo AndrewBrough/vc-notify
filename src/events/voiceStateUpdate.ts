@@ -3,6 +3,7 @@ import { getVoiceChannelTextChat } from '../discord/channels';
 import {
   buildDescriptionFromUserLines,
   buildSessionEmbed,
+  getNotifyRoleMention,
   makeJoinOrLeaveLine,
   parseUserLines,
   updateUserLine
@@ -36,9 +37,11 @@ export default {
       const otherMembers = newState.channel!.members.filter(m => m.id !== newState.id && !m.user.bot);
       const channelWasEmpty = otherMembers.size === 0;
       if (channelWasEmpty) {
+        // Get the notify role mention for this guild
+        const roleMention = getNotifyRoleMention(voiceChannel.guild);
         // Start a new session: send a new embed message
         const description = makeJoinOrLeaveLine(member.id, now, 'join');
-        const embed = buildSessionEmbed(voiceChannel.name, description);
+        const embed = buildSessionEmbed(voiceChannel.name, description, roleMention);
         await sendEmbedMessage(textChannel, embed);
         return;
       }
