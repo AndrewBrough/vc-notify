@@ -14,7 +14,7 @@ export function getNotifyRoleMention(guild: Guild): string | undefined {
   let role = roleId ? guild.roles.cache.get(roleId) : undefined;
   if (!role) {
     // fallback to "birds"
-    role = guild.roles.cache.find(r => r.name === 'birds');
+    role = guild.roles.cache.find((r) => r.name === 'birds');
   }
   return role ? `<@&${role.id}>` : undefined;
-} 
+}

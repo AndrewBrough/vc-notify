@@ -8,5 +8,8 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "files.associations": {
     "*.ts": "typescript"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 } 

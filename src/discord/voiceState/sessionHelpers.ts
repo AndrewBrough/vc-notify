@@ -9,6 +9,7 @@ export function isSessionExpired(lastSessionMsg: Message | undefined): boolean {
   }
   if (!lastSessionMsg) return true;
   const now = Date.now();
-  const lastTimestamp = lastSessionMsg.editedTimestamp || lastSessionMsg.createdTimestamp;
+  const lastTimestamp =
+    lastSessionMsg.editedTimestamp || lastSessionMsg.createdTimestamp;
   return now - lastTimestamp > SESSION_TIMEOUT_MS;
-} 
+}

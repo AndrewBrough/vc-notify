@@ -5,12 +5,18 @@ export function formatDiscordTimestamp(date: Date): string {
   return `<t:${Math.floor(date.getTime() / 1000)}:t>`;
 }
 
-export function makeJoinOrLeaveLine(memberId: string, time: Date, type: 'join' | 'leave') {
+export function makeJoinOrLeaveLine(
+  memberId: string,
+  time: Date,
+  type: 'join' | 'leave'
+) {
   const emoji = type === 'join' ? '💚' : '💔';
   return `<@${memberId}> ${emoji} ${formatDiscordTimestamp(time)}`;
 }
 
-export function parseUserLines(description: string | null | undefined): Record<string, string> {
+export function parseUserLines(
+  description: string | null | undefined
+): Record<string, string> {
   // Returns a map of user mention to line
   if (!description) return {};
   const lines = description.split('\n');
@@ -34,14 +40,22 @@ export function updateUserLine(
   return userLines;
 }
 
-export function buildDescriptionFromUserLines(userLines: Record<string, string>): string {
+export function buildDescriptionFromUserLines(
+  userLines: Record<string, string>
+): string {
   return Object.values(userLines).join('\n');
 }
 
-export function buildSessionEmbed(channelName: string, description: string, roleMention?: string): EmbedBuilder {
+export function buildSessionEmbed(
+  channelName: string,
+  description: string,
+  roleMention?: string
+): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
-    .setTitle(`🎤 Voice session started in ${channelName}${roleMention ? ' ' + roleMention : ''}`)
+    .setTitle(
+      `🎤 Voice session started in ${channelName}${roleMention ? ' ' + roleMention : ''}`
+    )
     .setDescription(description);
 }
 
@@ -55,22 +69,25 @@ export function errorEmbed(): EmbedBuilder {
 
 export function isVcNotifyMessage(message: Message): boolean {
   // Check if this is a vc-notify message by looking for our embed pattern
-  return !!(message.author?.bot && 
-         message.embeds?.length > 0 && 
-         message.embeds[0]?.title?.includes('joined'));
+  return !!(
+    message.author?.bot &&
+    message.embeds?.length > 0 &&
+    message.embeds[0]?.title?.includes('joined')
+  );
 }
 
-export function createVoiceJoinEmbed(memberId: string, channelName: string): EmbedBuilder {
+export function createVoiceJoinEmbed(
+  memberId: string,
+  channelName: string
+): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x57f287)
     .setTitle(`🎤 Voice session started in ${channelName}`)
-    .setFields([
-      { name: memberId, value: `is here!` }
-    ]);
+    .setFields([{ name: memberId, value: `is here!` }]);
 }
 
 export function createSecondaryJoinEmbed(memberId: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(0x747f8d)
     .setDescription(`<@${memberId}> is here`);
-} 
+}

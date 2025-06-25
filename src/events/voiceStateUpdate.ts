@@ -6,9 +6,13 @@ import {
   getNotifyRoleMention,
   makeJoinOrLeaveLine,
   parseUserLines,
-  updateUserLine
+  updateUserLine,
 } from '../discord/embeds';
-import { findLatestEmbedByUser, sendEmbedMessage, updateEmbedMessage } from '../discord/messages';
+import {
+  findLatestEmbedByUser,
+  sendEmbedMessage,
+  updateEmbedMessage,
+} from '../discord/messages';
 
 // Main event handler for voice state updates
 export default {
@@ -24,7 +28,10 @@ export default {
     if (!textChannel) return;
 
     // Find the latest session embed sent by the bot
-    const lastSessionMsg = await findLatestEmbedByUser(textChannel, textChannel.client.user!.id);
+    const lastSessionMsg = await findLatestEmbedByUser(
+      textChannel,
+      textChannel.client.user!.id
+    );
 
     // Determine join/leave
     const joined = !!newState.channel && !oldState.channel;
@@ -34,14 +41,20 @@ export default {
     // Handle join event
     if (joined) {
       // Check if the channel was empty before this user joined
-      const otherMembers = newState.channel!.members.filter(m => m.id !== newState.id && !m.user.bot);
+      const otherMembers = newState.channel!.members.filter(
+        (m) => m.id !== newState.id && !m.user.bot
+      );
       const channelWasEmpty = otherMembers.size === 0;
       if (channelWasEmpty) {
         // Get the notify role mention for this guild
         const roleMention = getNotifyRoleMention(voiceChannel.guild);
         // Start a new session: send a new embed message
         const description = makeJoinOrLeaveLine(member.id, now, 'join');
-        const embed = buildSessionEmbed(voiceChannel.name, description, roleMention);
+        const embed = buildSessionEmbed(
+          voiceChannel.name,
+          description,
+          roleMention
+        );
         await sendEmbedMessage(textChannel, embed);
         return;
       }
@@ -62,4 +75,4 @@ export default {
       await updateEmbedMessage(lastSessionMsg, embed);
     }
   },
-}; 
+};

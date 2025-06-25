@@ -1,4 +1,9 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, Role, SlashCommandBuilder } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  PermissionFlagsBits,
+  Role,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const DATA_FILE = './data/vcNotifyRoles.json';
@@ -16,8 +21,9 @@ export default {
   data: new SlashCommandBuilder()
     .setName('change-vc-notify-role')
     .setDescription('Change the role used for VC notifications')
-    .addRoleOption(option =>
-      option.setName('role')
+    .addRoleOption((option) =>
+      option
+        .setName('role')
         .setDescription('The role to use for notifications')
         .setRequired(true)
     )
@@ -27,17 +33,30 @@ export default {
     if (!interaction.guild) return;
     const member = await interaction.guild.members.fetch(interaction.user.id);
     if (!member.permissions.has(PermissionFlagsBits.ManageRoles)) {
-      return interaction.reply({ content: 'You need Manage Roles permission to use this command.', ephemeral: true });
+      return interaction.reply({
+        content: 'You need Manage Roles permission to use this command.',
+        ephemeral: true,
+      });
     }
     const role = interaction.options.getRole('role', true) as Role;
-    if (!interaction.guild.members.me?.permissions.has(PermissionFlagsBits.ManageRoles)) {
-      return interaction.reply({ content: 'I need the Manage Roles permission to do this!', ephemeral: true });
+    if (
+      !interaction.guild.members.me?.permissions.has(
+        PermissionFlagsBits.ManageRoles
+      )
+    ) {
+      return interaction.reply({
+        content: 'I need the Manage Roles permission to do this!',
+        ephemeral: true,
+      });
     }
     // Save the role ID for this guild
     const map = readRoleMap();
     map[interaction.guild.id] = role.id;
     writeRoleMap(map);
-    await interaction.reply({ content: `VC notification role set to ${role.toString()}. Future notifications will mention this role.`, ephemeral: true });
+    await interaction.reply({
+      content: `VC notification role set to ${role.toString()}. Future notifications will mention this role.`,
+      ephemeral: true,
+    });
     return;
   },
-}; 
+};

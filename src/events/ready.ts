@@ -12,4 +12,4 @@ export default {
     console.log(`Logged in as ${client.user!.tag}`);
     // No commands to register since we removed all commands
   },
-}; 
+};

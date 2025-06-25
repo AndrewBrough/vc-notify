@@ -11,16 +11,18 @@ import { initializeDataDirectory } from './utils/init';
 initializeDataDirectory();
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
-  ],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 }) as ExtendedClient;
 
 // Register events
-const events: Event[] = [ready, interactionCreate, voiceStateUpdate, guildCreate];
+const events: Event[] = [
+  ready,
+  interactionCreate,
+  voiceStateUpdate,
+  guildCreate,
+];
 
-events.forEach(event => {
+events.forEach((event) => {
   if (event.once) {
     client.once(event.name, (...args: any[]) => event.execute(...args));
   } else {
@@ -28,4 +30,4 @@ events.forEach(event => {
   }
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN); 
+client.login(process.env.DISCORD_BOT_TOKEN);

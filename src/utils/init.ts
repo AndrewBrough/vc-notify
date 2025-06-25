@@ -11,4 +11,4 @@ export function initializeDataDirectory(): void {
   const dataDir = path.join(__dirname, '..', '..', 'data');
   ensureDirectoryExists(dataDir);
   // No files to initialize currently
-} 
+}
