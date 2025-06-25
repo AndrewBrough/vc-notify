@@ -28,8 +28,20 @@ export async function findLatestEmbedByUser(
   userId: string,
   limit = 20
 ): Promise<Message | undefined> {
-  const messages = await channel.messages.fetch({ limit });
-  return messages.find(
-    (msg) => msg.author.id === userId && msg.embeds.length > 0
-  );
+  try {
+    const messages = await channel.messages.fetch({ limit });
+    return messages.find(
+      (msg) => msg.author.id === userId && msg.embeds.length > 0
+    );
+  } catch (error) {
+    // Handle permission errors gracefully
+    if (error instanceof Error && 'code' in error && error.code === 50001) {
+      console.log(
+        `Missing permission to read message history in channel #${channel.name} (${channel.id})`
+      );
+      return undefined;
+    }
+    // Re-throw other errors
+    throw error;
+  }
 }

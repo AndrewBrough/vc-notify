@@ -2,34 +2,51 @@ import { ChatInputCommandInteraction, Events, Interaction } from 'discord.js';
 import changeVcNotifyRole from '../commands/changeVcNotifyRole';
 import { ExtendedClient } from '../types';
 
-const commands: Record<
-  string,
-  { execute: (interaction: ChatInputCommandInteraction) => Promise<any> }
-> = {
+interface Command {
+  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+}
+
+const commands: Record<string, Command> = {
   'change-vc-notify-role': changeVcNotifyRole,
 };
 
 export default {
   name: Events.InteractionCreate,
-  async execute(_client: ExtendedClient, interaction: Interaction) {
+  async execute(
+    _client: ExtendedClient,
+    interaction: Interaction
+  ): Promise<void> {
     if (!interaction.isChatInputCommand()) return;
+
     const command = commands[interaction.commandName];
     if (!command) return;
+
     try {
       await command.execute(interaction);
-    } catch (err) {
-      console.error(err);
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content: 'There was an error while executing this command!',
-          ephemeral: true,
-        });
-      } else {
-        await interaction.reply({
-          content: 'There was an error while executing this command!',
-          ephemeral: true,
-        });
-      }
+    } catch (error) {
+      console.error(
+        `Error executing command ${interaction.commandName}:`,
+        error
+      );
+      await sendErrorResponse(interaction);
     }
   },
 };
+
+async function sendErrorResponse(
+  interaction: ChatInputCommandInteraction
+): Promise<void> {
+  const errorMessage = 'There was an error while executing this command!';
+
+  if (interaction.replied || interaction.deferred) {
+    await interaction.followUp({
+      content: errorMessage,
+      ephemeral: true,
+    });
+  } else {
+    await interaction.reply({
+      content: errorMessage,
+      ephemeral: true,
+    });
+  }
+}
