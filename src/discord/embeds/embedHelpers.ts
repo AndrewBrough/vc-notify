@@ -36,7 +36,24 @@ export function updateUserLine(
   time: Date,
   type: 'join' | 'leave'
 ): Record<string, string> {
-  userLines[`<@${memberId}>`] = makeJoinOrLeaveLine(memberId, time, type);
+  const key = `<@${memberId}>`;
+  if (type === 'join') {
+    // On join, always reset to a new join line
+    userLines[key] = makeJoinOrLeaveLine(memberId, time, 'join');
+  } else {
+    // On leave, if there is a join line, convert it to a range
+    const prevLine = userLines[key];
+    const joinMatch = prevLine?.match(/<t:(\d+):t>/);
+    if (joinMatch) {
+      const joinTimestamp = Number(joinMatch[1]) * 1000;
+      const joinDate = new Date(joinTimestamp);
+      userLines[key] =
+        `<@${memberId}> 💔 ${formatDiscordTimestamp(joinDate)} - ${formatDiscordTimestamp(time)}`;
+    } else {
+      // If no join line, just show leave
+      userLines[key] = makeJoinOrLeaveLine(memberId, time, 'leave');
+    }
+  }
   return userLines;
 }
 
