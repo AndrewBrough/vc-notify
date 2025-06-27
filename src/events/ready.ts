@@ -1,27 +1,32 @@
 import { Events } from 'discord.js';
+import { config } from '../config/environment';
 import { ExtendedClient } from '../types';
 import { registerCommands } from '../utils/commandRegistration';
+import { logError } from '../utils/errorHandling';
 
-const INVITE_LINK =
-  'https://discord.com/oauth2/authorize?client_id=1347826239804538894&permissions=397553134592&integration_type=0&scope=bot+applications.commands';
+const executeReady = async (client: ExtendedClient): Promise<void> => {
+  console.log(`🤖 Logged in as ${client.user!.tag} (${config.bot.name})\n`);
 
-export default {
+  // Register slash commands
+  if (client.user) {
+    try {
+      await registerCommands();
+    } catch (error) {
+      logError('command registration on ready', error);
+    }
+  }
+
+  console.log('\n=== Bot Invite Link ===');
+  console.log(`Use this link to invite ${config.bot.name} to your server:`);
+  console.log(config.bot.inviteLink);
+  console.log('\n=== Environment Info ===');
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Data Directory: ${config.dataDirectory}`);
+  console.log(`Log Level: ${config.logLevel}`);
+};
+
+export const readyEvent = {
   name: Events.ClientReady,
   once: true,
-
-  /**
-   * @param client Discord Client
-   */
-  async execute(client: ExtendedClient) {
-    console.log(`Logged in as ${client.user!.tag}\n`);
-
-    // Register slash commands
-    if (client.user) {
-      await registerCommands(client.user.id, process.env.DISCORD_BOT_TOKEN!);
-    }
-
-    console.log('\n=== Bot Invite Link ===');
-    console.log('Use this link to invite the bot to your server:');
-    console.log(INVITE_LINK);
-  },
+  execute: executeReady,
 };

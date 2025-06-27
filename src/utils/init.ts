@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import { config } from '../config/environment';
 
-function ensureDirectoryExists(dirPath: string): void {
+const ensureDirectoryExists = (dirPath: string): void => {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
-}
+};
 
-export function initializeDataDirectory(): void {
-  const dataDir = path.join(__dirname, '..', '..', 'data');
+export const initializeDataDirectory = (): void => {
+  const dataDir = path.resolve(config.dataDirectory);
   ensureDirectoryExists(dataDir);
-  // No files to initialize currently
-}
+  console.log(`📁 Data directory initialized: ${dataDir}`);
+};

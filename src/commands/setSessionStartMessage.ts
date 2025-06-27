@@ -1,41 +1,49 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { logError, sendErrorResponse } from '../utils/errorHandling';
+import { setSessionStartMessage } from '../utils/sessionMessages';
 
-const DATA_FILE = './data/sessionStartMessages.json';
+const setSessionStartMessageData = new SlashCommandBuilder()
+  .setName('set-session-start-message')
+  .setDescription(
+    'Set the session start message. Use @role and #channel for mentions.'
+  )
+  .addStringOption((option) =>
+    option
+      .setName('message')
+      .setDescription(
+        'Custom message (Discord mentions like @role and #channel are supported)'
+      )
+      .setRequired(true)
+      .setMaxLength(200)
+  );
 
-function readMessageMap(): Record<string, string> {
-  if (!existsSync(DATA_FILE)) return {};
-  return JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
-}
+const updateSessionStartMessage = async (
+  interaction: ChatInputCommandInteraction
+): Promise<void> => {
+  const message = interaction.options.getString('message', true);
 
-function writeMessageMap(map: Record<string, string>) {
-  writeFileSync(DATA_FILE, JSON.stringify(map, null, 2));
-}
+  setSessionStartMessage(interaction.guild!.id, message);
 
-export default {
-  data: new SlashCommandBuilder()
-    .setName('set-session-start-message')
-    .setDescription(
-      'Set the session start message. Use @role and #channel for mentions.'
-    )
-    .addStringOption((option) =>
-      option
-        .setName('message')
-        .setDescription(
-          'Custom message (Discord mentions like @role and #channel are supported)'
-        )
-        .setRequired(true)
-        .setMaxLength(200)
-    ),
-  async execute(interaction: ChatInputCommandInteraction): Promise<void> {
-    if (!interaction.guild) return;
-    const message = interaction.options.getString('message', true);
-    const map = readMessageMap();
-    map[interaction.guild.id] = message;
-    writeMessageMap(map);
-    await interaction.reply({
-      content: `✅ Session start message set to:\n${message}\n(Mentions will work as in normal Discord messages.)`,
-      ephemeral: true,
-    });
-  },
+  await interaction.reply({
+    content: `✅ Session start message set to:\n${message}\n(Mentions will work as in normal Discord messages.)`,
+    ephemeral: true,
+  });
+};
+
+const executeSetSessionStartMessage = async (
+  interaction: ChatInputCommandInteraction
+): Promise<void> => {
+  if (!interaction.guild) return;
+
+  try {
+    await updateSessionStartMessage(interaction);
+  } catch (error) {
+    logError('set-session-start-message command', error);
+    await sendErrorResponse(interaction);
+  }
+};
+
+export const setSessionStartMessageCommand = {
+  data: setSessionStartMessageData,
+  execute: executeSetSessionStartMessage,
 };

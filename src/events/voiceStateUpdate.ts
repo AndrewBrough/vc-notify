@@ -6,7 +6,6 @@ import {
   VoiceBasedChannel,
   VoiceState,
 } from 'discord.js';
-import { existsSync, readFileSync } from 'fs';
 import { getVoiceChannelTextChat } from '../discord/channels';
 import {
   buildDescriptionFromUserLines,
@@ -20,42 +19,13 @@ import {
   sendEmbedMessage,
   updateEmbedMessage,
 } from '../discord/messages';
+import { logError } from '../utils/errorHandling';
+import { getFormattedSessionStartMessage } from '../utils/sessionMessages';
 
-function getSessionStartMessage(
-  guildId: string,
-  roleMention: string | undefined
-): string {
-  const DATA_FILE = './data/sessionStartMessages.json';
-  let customMessage: string | undefined;
-  if (existsSync(DATA_FILE)) {
-    const map = JSON.parse(readFileSync(DATA_FILE, 'utf-8')) as Record<
-      string,
-      string
-    >;
-    customMessage = map[guildId];
-  }
-  if (customMessage) {
-    return customMessage;
-  }
-  return `🎤 Voice session started! ${roleMention ?? ''}`.trim();
-}
-
-// Main event handler for voice state updates
-export default {
-  name: Events.VoiceStateUpdate,
-  async execute(oldState: VoiceState, newState: VoiceState): Promise<void> {
-    try {
-      await handleVoiceStateUpdate(oldState, newState);
-    } catch (error) {
-      console.error('Error in voice state update:', error);
-    }
-  },
-};
-
-async function handleVoiceStateUpdate(
+const handleVoiceStateUpdate = async (
   oldState: VoiceState,
   newState: VoiceState
-): Promise<void> {
+): Promise<void> => {
   const member = newState.member || oldState.member;
   if (!member || member.user.bot) return;
 
@@ -80,47 +50,69 @@ async function handleVoiceStateUpdate(
   }
 
   await updateExistingSession(lastSessionMsg, member, joined, left, now);
-}
+};
 
-function isChannelEmpty(newState: VoiceState): boolean {
+const isChannelEmpty = (newState: VoiceState): boolean => {
   const otherMembers = newState.channel!.members.filter(
     (member) => member.id !== newState.id && !member.user.bot
   );
   return otherMembers.size === 0;
-}
+};
 
-async function startNewSession(
+const startNewSession = async (
   voiceChannel: VoiceBasedChannel,
   member: GuildMember,
   now: Date,
   textChannel: TextChannel
-): Promise<void> {
+): Promise<void> => {
   const roleMention = getNotifyRoleMention(voiceChannel.guild);
   const userLines = updateUserLine({}, member.id, now, 'join');
   const description = buildDescriptionFromUserLines(userLines);
-  const content = getSessionStartMessage(voiceChannel.guild.id, roleMention);
+  const content = getFormattedSessionStartMessage(
+    voiceChannel.guild.id,
+    roleMention
+  );
   const embed = buildSessionEmbed(description);
-  await sendEmbedMessage(textChannel, embed, content);
-}
 
-async function updateExistingSession(
+  await sendEmbedMessage(textChannel, embed, content);
+};
+
+const updateExistingSession = async (
   lastSessionMsg: Message | undefined,
   member: GuildMember,
   joined: boolean,
   left: boolean,
   now: Date
-): Promise<void> {
+): Promise<void> => {
   if (!lastSessionMsg) return;
 
-  let userLines = parseUserLines(lastSessionMsg.embeds[0]?.description);
+  const userLines = parseUserLines(lastSessionMsg.embeds[0]?.description);
 
   if (joined) {
-    userLines = updateUserLine(userLines, member.id, now, 'join');
+    const updatedUserLines = updateUserLine(userLines, member.id, now, 'join');
+    const description = buildDescriptionFromUserLines(updatedUserLines);
+    const embed = buildSessionEmbed(description);
+    await updateEmbedMessage(lastSessionMsg, embed);
   } else if (left) {
-    userLines = updateUserLine(userLines, member.id, now, 'leave');
+    const updatedUserLines = updateUserLine(userLines, member.id, now, 'leave');
+    const description = buildDescriptionFromUserLines(updatedUserLines);
+    const embed = buildSessionEmbed(description);
+    await updateEmbedMessage(lastSessionMsg, embed);
   }
+};
 
-  const description = buildDescriptionFromUserLines(userLines);
-  const embed = buildSessionEmbed(description);
-  await updateEmbedMessage(lastSessionMsg, embed);
-}
+const executeVoiceStateUpdate = async (
+  oldState: VoiceState,
+  newState: VoiceState
+): Promise<void> => {
+  try {
+    await handleVoiceStateUpdate(oldState, newState);
+  } catch (error) {
+    logError('voice state update', error);
+  }
+};
+
+export const voiceStateUpdateEvent = {
+  name: Events.VoiceStateUpdate,
+  execute: executeVoiceStateUpdate,
+};

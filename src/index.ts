@@ -1,9 +1,10 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
-import guildCreate from './events/guildCreate';
-import interactionCreate from './events/interactionCreate';
-import ready from './events/ready';
-import voiceStateUpdate from './events/voiceStateUpdate';
+import { config } from './config/environment';
+import { guildCreateEvent } from './events/guildCreate';
+import { interactionCreateEvent } from './events/interactionCreate';
+import { readyEvent } from './events/ready';
+import { voiceStateUpdateEvent } from './events/voiceStateUpdate';
 import { Event, ExtendedClient } from './types';
 import { initializeDataDirectory } from './utils/init';
 
@@ -16,10 +17,10 @@ const client = new Client({
 
 // Register events
 const events: Event[] = [
-  ready,
-  interactionCreate,
-  voiceStateUpdate,
-  guildCreate,
+  readyEvent,
+  interactionCreateEvent,
+  voiceStateUpdateEvent,
+  guildCreateEvent,
 ];
 
 events.forEach((event) => {
@@ -30,4 +31,5 @@ events.forEach((event) => {
   }
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
+console.log(`🚀 Starting ${config.bot.name}...`);
+client.login(config.bot.token);
