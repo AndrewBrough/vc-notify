@@ -1,3 +1,3 @@
-export { default as interactionCreate } from './interactionCreate';
-export { default as ready } from './ready';
-export { default as voiceStateUpdate } from './voiceStateUpdate';
+export { interactionCreateEvent } from './interactionCreate';
+export { readyEvent } from './ready';
+export { voiceStateUpdateEvent } from './voiceStateUpdate';
