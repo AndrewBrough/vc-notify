@@ -1,7 +1,6 @@
-import { config } from '../config/environment';
 import { readJSON, writeJSON } from './helpers/jsonHelpers';
 
-const SESSION_MESSAGES_FILE = `${config.dataDirectory}/sessionStartMessages.json`;
+const SESSION_MESSAGES_FILE = `${import.meta.env.DISCORD_BOT_DATA_DIR}/sessionStartMessages.json`;
 
 /**
  * Reads the session message mapping from the data file

@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { config } from '../config/environment';
 
 const ensureDirectoryExists = (dirPath: string): void => {
   if (!fs.existsSync(dirPath)) {
@@ -9,7 +8,7 @@ const ensureDirectoryExists = (dirPath: string): void => {
 };
 
 export const initializeDataDirectory = (): void => {
-  const dataDir = path.resolve(config.dataDirectory);
+  const dataDir = path.resolve(import.meta.env.DISCORD_BOT_DATA_DIR);
   ensureDirectoryExists(dataDir);
   console.log(`📁 Data directory initialized: ${dataDir}`);
 };

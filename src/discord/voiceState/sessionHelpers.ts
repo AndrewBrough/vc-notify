@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 const SESSION_TIMEOUT_MS = 60 * 1000; // 1 minute
 
 export function isSessionExpired(lastSessionMsg: Message | undefined): boolean {
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.MODE === 'development') {
     // In dev mode, always expire to make testing easier
     return true;
   }

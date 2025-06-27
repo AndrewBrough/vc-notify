@@ -1,11 +1,13 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import 'dotenv/config';
-import { config } from './config/environment';
 import { guildCreateEvent } from './events/guildCreate';
 import { interactionCreateEvent } from './events/interactionCreate';
 import { readyEvent } from './events/ready';
 import { voiceStateUpdateEvent } from './events/voiceStateUpdate';
 import { initializeDataDirectory } from './utils/init';
+
+console.log(`\n`);
+console.log(`🔍 Environment Config:\n`, import.meta.env);
+console.log(`\n`);
 
 // Initialize data directory and files
 initializeDataDirectory();
@@ -19,6 +21,7 @@ client.once('ready', readyEvent.execute);
 client.on('interactionCreate', interactionCreateEvent.execute);
 client.on('voiceStateUpdate', voiceStateUpdateEvent.execute);
 client.on('guildCreate', guildCreateEvent.execute);
+client.on('guildCreate', guildCreateEvent.execute);
 
-console.log(`🚀 Starting ${config.bot.name}...`);
-client.login(config.bot.token);
+console.log(`🔍 Logging in with token: ${import.meta.env.DISCORD_BOT_TOKEN}`);
+client.login(import.meta.env.DISCORD_BOT_TOKEN);

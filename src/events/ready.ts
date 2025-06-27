@@ -1,10 +1,9 @@
 import { Client, Events } from 'discord.js';
-import { config } from '../config/environment';
 import { registerCommands } from '../utils/commandRegistration';
 import { logError } from '../utils/errorHandling';
 
 const executeReady = async (client: Client): Promise<void> => {
-  console.log(`🤖 Logged in as ${client.user!.tag} (${config.bot.name})\n`);
+  console.log(`🤖 Logged in as ${client.user!.tag}`);
 
   // Register slash commands
   if (client.user) {
@@ -15,19 +14,8 @@ const executeReady = async (client: Client): Promise<void> => {
     }
   }
 
-  // Always output the invite link prominently
-  console.log('\n' + '='.repeat(60));
-  console.log('🔗 BOT INVITE LINK');
-  console.log('='.repeat(60));
-  console.log(`Use this link to invite ${config.bot.name} to your server:`);
-  console.log(config.bot.inviteLink);
-  console.log('='.repeat(60));
-
-  console.log('\n=== Environment Info ===');
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Data Directory: ${config.dataDirectory}`);
-  console.log(`Log Level: ${config.logLevel}`);
-  console.log('\n' + '='.repeat(60));
+  console.log('============== 🔗 BOT INVITE LINK ==============');
+  console.log(import.meta.env.DISCORD_INVITE_LINK);
 };
 
 export const readyEvent = {

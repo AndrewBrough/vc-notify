@@ -1,24 +1,20 @@
 {
   "scripts": {
-    "build": "tsc",
-    "dev": "nodemon src/index.ts",
-    "start": "node dist/index.js",
-    "stop": "pm2 stop 'Voice Channel Logger'",
-    "restart": "pm2 restart 'Voice Channel Logger'",
-    "logs": "pm2 logs 'Voice Channel Logger' --lines 20 --nostream",
+    "dev": "vite-node --watch src/index.ts --mode=development",
+    "dev:prod": "vite-node --watch src/index.ts --mode=production",
+    "build": "vite build",
+    "build:prod": "vite build --mode=production",
+    "start": "vite-node src/index.ts",
+    "start:prod": "vite-node src/index.ts --mode=production",
     "lint": "eslint src/**/*.ts --fix",
     "lint:check": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check src/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:test": "nodemon -r dotenv/config src/index.ts dotenv_config_path=.env.test",
-    "start:test": "node -r dotenv/config dist/index.js dotenv_config_path=.env.test",
-    "build:test": "tsc && npm run start:test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.4.7"
+    "discord.js": "^14.7.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -26,10 +22,10 @@
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
-    "nodemon": "^3.1.10",
     "prettier": "^3.2.0",
     "prettier-eslint-cli": "^8.0.0",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vite-node": "^3.2.4"
   }
 }

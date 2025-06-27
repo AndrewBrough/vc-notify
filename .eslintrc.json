@@ -8,19 +8,17 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
     "@typescript-eslint/no-explicit-any": "warn",
     "prefer-const": "error",
     "no-var": "error",
-    "no-console": "off"
+    "no-console": "off",
+    "prefer-destructuring": "warn"
   },
-  "ignorePatterns": [
-    "dist/",
-    "node_modules/",
-    "*.js"
-  ]
-} 
+  "ignorePatterns": ["dist/", "node_modules/", "*.js"]
+}

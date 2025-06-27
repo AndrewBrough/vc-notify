@@ -1,8 +1,7 @@
 import { ChatInputCommandInteraction, Role } from 'discord.js';
-import { config } from '../config/environment';
 import { readJSON, writeJSON } from './helpers/jsonHelpers';
 
-const ROLE_DATA_FILE = `${config.dataDirectory}/vcNotifyRoles.json`;
+const ROLE_DATA_FILE = `${import.meta.env.DISCORD_BOT_DATA_DIR}/vcNotifyRoles.json`;
 
 /**
  * Reads the role mapping from the data file

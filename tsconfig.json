@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2021", "DOM"],
-    "module": "commonjs",
+    "lib": ["ES2022"],
+    "module": "ESNext",
     "skipLibCheck": true,
 
     /* Output */
@@ -16,7 +16,7 @@
     "removeComments": false,
 
     /* Module Resolution */
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -37,15 +37,9 @@
     /* Path Mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/commands/*": ["./src/commands/*"],
-      "@/events/*": ["./src/events/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/services/*": ["./src/services/*"],
-      "@/config/*": ["./src/config/*"]
+      "@*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "commands", "events", "utils"]
 }
