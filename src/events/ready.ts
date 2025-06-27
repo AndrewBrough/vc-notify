@@ -16,13 +16,19 @@ const executeReady = async (client: ExtendedClient): Promise<void> => {
     }
   }
 
-  console.log('\n=== Bot Invite Link ===');
+  // Always output the invite link prominently
+  console.log('\n' + '='.repeat(60));
+  console.log('🔗 BOT INVITE LINK');
+  console.log('='.repeat(60));
   console.log(`Use this link to invite ${config.bot.name} to your server:`);
   console.log(config.bot.inviteLink);
+  console.log('='.repeat(60));
+
   console.log('\n=== Environment Info ===');
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Data Directory: ${config.dataDirectory}`);
   console.log(`Log Level: ${config.logLevel}`);
+  console.log('\n' + '='.repeat(60));
 };
 
 export const readyEvent = {
