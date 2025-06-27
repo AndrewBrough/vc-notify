@@ -1,10 +1,9 @@
-import { Events } from 'discord.js';
+import { Client, Events } from 'discord.js';
 import { config } from '../config/environment';
-import { ExtendedClient } from '../types';
 import { registerCommands } from '../utils/commandRegistration';
 import { logError } from '../utils/errorHandling';
 
-const executeReady = async (client: ExtendedClient): Promise<void> => {
+const executeReady = async (client: Client): Promise<void> => {
   console.log(`🤖 Logged in as ${client.user!.tag} (${config.bot.name})\n`);
 
   // Register slash commands

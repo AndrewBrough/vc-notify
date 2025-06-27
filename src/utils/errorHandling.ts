@@ -25,21 +25,3 @@ export const logError = (
   const message = customMessage || 'An error occurred';
   console.error(`${message} in ${context}:`, error);
 };
-
-/**
- * Wraps an async function with error handling
- */
-export const withErrorHandling = <T extends any[], R>(
-  fn: (...args: T) => Promise<R>,
-  context: string,
-  errorMessage?: string
-) => {
-  return async (...args: T): Promise<R | void> => {
-    try {
-      return await fn(...args);
-    } catch (error) {
-      logError(context, error, errorMessage);
-      throw error;
-    }
-  };
-};
