@@ -1,11 +1,4 @@
-import {
-  Events,
-  GuildMember,
-  Message,
-  TextChannel,
-  VoiceBasedChannel,
-  VoiceState,
-} from 'discord.js';
+import { Events, GuildMember, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { getVoiceChannelTextChat } from '../discord/channels';
 import {
   buildDescriptionFromUserLines,
@@ -29,9 +22,32 @@ const handleVoiceStateUpdate = async (
   const member = newState.member || oldState.member;
   if (!member || member.user.bot) return;
 
-  const voiceChannel = newState.channel || oldState.channel;
-  if (!voiceChannel) return;
+  const oldChannel = oldState.channel;
+  const newChannel = newState.channel;
+  const now = new Date();
 
+  // User left a channel
+  if (oldChannel && !newChannel) {
+    await handleLeave(oldChannel, member, now);
+  }
+
+  // User joined a channel
+  if (!oldChannel && newChannel) {
+    await handleJoin(newChannel, member, now);
+  }
+
+  // User moved between channels
+  if (oldChannel && newChannel && oldChannel.id !== newChannel.id) {
+    await handleLeave(oldChannel, member, now);
+    await handleJoin(newChannel, member, now);
+  }
+};
+
+const handleLeave = async (
+  voiceChannel: VoiceBasedChannel,
+  member: GuildMember,
+  now: Date
+) => {
   const textChannel = getVoiceChannelTextChat(voiceChannel);
   if (!textChannel) return;
 
@@ -39,66 +55,52 @@ const handleVoiceStateUpdate = async (
     textChannel,
     textChannel.client.user!.id
   );
-
-  const joined = !!newState.channel && !oldState.channel;
-  const left = !!oldState.channel && !newState.channel;
-  const now = new Date();
-
-  if (joined && isChannelEmpty(newState)) {
-    await startNewSession(voiceChannel, member, now, textChannel);
-    return;
-  }
-
-  await updateExistingSession(lastSessionMsg, member, joined, left, now);
-};
-
-const isChannelEmpty = (newState: VoiceState): boolean => {
-  const otherMembers = newState.channel!.members.filter(
-    (member) => member.id !== newState.id && !member.user.bot
-  );
-  return otherMembers.size === 0;
-};
-
-const startNewSession = async (
-  voiceChannel: VoiceBasedChannel,
-  member: GuildMember,
-  now: Date,
-  textChannel: TextChannel
-): Promise<void> => {
-  const roleMention = getNotifyRoleMention(voiceChannel.guild);
-  const userLines = updateUserLine({}, member.id, now, 'join');
-  const description = buildDescriptionFromUserLines(userLines);
-  const content = getFormattedSessionStartMessage(
-    voiceChannel.guild.id,
-    roleMention
-  );
-  const embed = buildSessionEmbed(description);
-
-  await sendEmbedMessage(textChannel, embed, content);
-};
-
-const updateExistingSession = async (
-  lastSessionMsg: Message | undefined,
-  member: GuildMember,
-  joined: boolean,
-  left: boolean,
-  now: Date
-): Promise<void> => {
   if (!lastSessionMsg) return;
 
   const userLines = parseUserLines(lastSessionMsg.embeds[0]?.description);
+  const updatedUserLines = updateUserLine(userLines, member.id, now, 'leave');
+  const description = buildDescriptionFromUserLines(updatedUserLines);
+  const embed = buildSessionEmbed(description);
+  await updateEmbedMessage(lastSessionMsg, embed);
+};
 
-  if (joined) {
-    const updatedUserLines = updateUserLine(userLines, member.id, now, 'join');
-    const description = buildDescriptionFromUserLines(updatedUserLines);
+const handleJoin = async (
+  voiceChannel: VoiceBasedChannel,
+  member: GuildMember,
+  now: Date
+) => {
+  const textChannel = getVoiceChannelTextChat(voiceChannel);
+  if (!textChannel) return;
+
+  // If channel is empty (first join), start a new session
+  const otherMembers = voiceChannel.members.filter(
+    (m) => m.id !== member.id && !m.user.bot
+  );
+  if (otherMembers.size === 0) {
+    const roleMention = getNotifyRoleMention(voiceChannel.guild);
+    const userLines = updateUserLine({}, member.id, now, 'join');
+    const description = buildDescriptionFromUserLines(userLines);
+    const content = getFormattedSessionStartMessage(
+      voiceChannel.guild.id,
+      roleMention
+    );
     const embed = buildSessionEmbed(description);
-    await updateEmbedMessage(lastSessionMsg, embed);
-  } else if (left) {
-    const updatedUserLines = updateUserLine(userLines, member.id, now, 'leave');
-    const description = buildDescriptionFromUserLines(updatedUserLines);
-    const embed = buildSessionEmbed(description);
-    await updateEmbedMessage(lastSessionMsg, embed);
+    await sendEmbedMessage(textChannel, embed, content);
+    return;
   }
+
+  // Otherwise, update the existing session
+  const lastSessionMsg = await findLatestEmbedByUser(
+    textChannel,
+    textChannel.client.user!.id
+  );
+  if (!lastSessionMsg) return;
+
+  const userLines = parseUserLines(lastSessionMsg.embeds[0]?.description);
+  const updatedUserLines = updateUserLine(userLines, member.id, now, 'join');
+  const description = buildDescriptionFromUserLines(updatedUserLines);
+  const embed = buildSessionEmbed(description);
+  await updateEmbedMessage(lastSessionMsg, embed);
 };
 
 const executeVoiceStateUpdate = async (
