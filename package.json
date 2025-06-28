@@ -1,9 +1,6 @@
 {
   "scripts": {
     "dev": "vite-node --watch src/index.ts --mode=development",
-    "lin:fix": "eslint src/**/*.ts --fix",
-    "lint:check": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts",
     "build:prod": "vite build --mode=production",
     "pm2:start": "npm run build:prod && pm2 start dist/index.js --name vc-notify",
     "pm2:stop": "pm2 stop vc-notify",

@@ -1,33 +1,46 @@
 {
-	"version": "2.0.0",
 	"tasks": [
+		{
+			"type": "npm",
+			"script": "pm2:start",
+			"problemMatcher": [],
+			"label": "npm: pm2:start",
+			"detail": "npm run build:prod && pm2 start dist/index.js --name vc-notify"
+		},
+		{
+			"type": "npm",
+			"script": "pm2:stop",
+			"problemMatcher": [],
+			"label": "npm: pm2:stop",
+			"detail": "pm2 stop vc-notify"
+		},
+		{
+			"type": "npm",
+			"script": "pm2:restart",
+			"problemMatcher": [],
+			"label": "npm: pm2:restart",
+			"detail": "pm2 restart vc-notify"
+		},
+		{
+			"type": "npm",
+			"script": "pm2:logs",
+			"problemMatcher": [],
+			"label": "npm: pm2:logs",
+			"detail": "pm2 logs vc-notify"
+		},
+		{
+			"type": "npm",
+			"script": "pm2:status",
+			"problemMatcher": [],
+			"label": "npm: pm2:status",
+			"detail": "pm2 status"
+		},
 		{
 			"type": "npm",
 			"script": "dev",
 			"problemMatcher": [],
 			"label": "npm: dev",
-			"detail": "nodemon"
-		},
-		{
-			"type": "npm",
-			"script": "start",
-			"problemMatcher": [],
-			"label": "npm: start",
-			"detail": "npm run build && pm2 start dist/index.js --name 'Voice Channel Logger'"
-		},
-		{
-			"type": "npm",
-			"script": "stop",
-			"problemMatcher": [],
-			"label": "npm: stop",
-			"detail": "pm2 stop 'Voice Channel Logger'"
-		},
-		{
-			"type": "npm",
-			"script": "restart",
-			"problemMatcher": [],
-			"label": "npm: restart",
-			"detail": "pm2 restart 'Voice Channel Logger'"
+			"detail": "vite-node --watch src/index.ts --mode=development"
 		}
 	]
 }
