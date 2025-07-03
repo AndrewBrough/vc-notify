@@ -11,6 +11,42 @@ The bot now includes comprehensive tracking of voice channel events and state va
 - Discord API events are not received properly
 - Users are moved by moderators or other bots
 - Channels are deleted while users are in them
+- Guilds become unavailable and miss events
+- Users join servers while already in voice channels
+
+## Discord Gateway API Event Coverage
+
+Our implementation covers all relevant Discord Gateway API events that affect voice channel state:
+
+### ✅ **Primary Voice Events**
+- **`voiceStateUpdate`** - Core event for all voice channel changes
+  - User joins voice channel
+  - User leaves voice channel
+  - User moves between voice channels
+  - User mute/deafen status changes
+
+### ✅ **Member State Events**
+- **`guildMemberUpdate`** - Member state changes
+  - Role changes that might affect notifications
+  - Voice state changes (mute/deafen status)
+- **`guildMemberAdd`** - New member joins server
+  - Handles users joining while already in voice channels
+- **`guildMemberRemove`** - Member leaves server
+  - Cleans up state when users leave while in voice channels
+
+### ✅ **Channel Management Events**
+- **`channelDelete`** - Voice channel deletion
+  - Handles cleanup when channels are deleted with active sessions
+
+### ✅ **Guild Availability Events**
+- **`guildUnavailable`** - Guild becomes unavailable
+  - Logs potential for missed events during outages
+- **`guildAvailable`** - Guild becomes available again
+  - Triggers immediate state validation after restoration
+
+### ✅ **Guild Management Events**
+- **`guildCreate`** - Bot joins new guild
+  - Sets up default notification roles
 
 ## New Events Tracked
 
@@ -19,16 +55,26 @@ The bot now includes comprehensive tracking of voice channel events and state va
 - Monitors role changes that might affect notifications
 - Logs voice state changes for debugging
 
-### 2. Channel Deletion (`channelDelete`)
+### 2. Guild Member Add (`guildMemberAdd`)
+- Detects when users join the server while already in voice channels
+- Handles edge cases where users are moved between servers
+- Logs unusual but possible scenarios
+
+### 3. Guild Member Remove (`guildMemberRemove`)
+- Tracks when users leave the server while in voice channels
+- Provides debugging information for state inconsistencies
+
+### 4. Channel Deletion (`channelDelete`)
 - Detects when voice channels are deleted
 - Logs potential session interruptions
 - Helps identify orphaned session messages
 
-### 3. Guild Member Removal (`guildMemberRemove`)
-- Tracks when users leave the server while in voice channels
-- Provides debugging information for state inconsistencies
+### 5. Guild Availability (`guildUnavailable` / `guildAvailable`)
+- Monitors guild availability status
+- Triggers validation after outages
+- Handles potential missed events during downtime
 
-### 4. Enhanced Voice State Updates
+### 6. Enhanced Voice State Updates
 - Improved logging for all voice state changes
 - Better error handling and recovery
 - Detailed member tracking per channel
@@ -77,6 +123,7 @@ State validation is also triggered by certain events:
 - When users join/leave channels
 - When channels are deleted
 - When guild members are updated
+- When guilds become available after outages
 
 ## Debugging Features
 
@@ -122,6 +169,10 @@ Comprehensive reports show:
    - Use `/sync-voice-state` to clean up empty sessions
    - This can happen when the last user leaves unexpectedly
 
+5. **Guild Outage Issues**
+   - Guild availability events trigger automatic validation
+   - Use `/validate-voice-state` after outages to check for issues
+
 ### Manual State Recovery
 
 If you encounter persistent state issues:
@@ -149,15 +200,17 @@ Console logging can be controlled by modifying the logging statements in the eve
 2. **Quick Fixes**: Use `/sync-voice-state` immediately when you notice inconsistencies
 3. **Log Review**: Check console logs for any unusual patterns or errors
 4. **Permission Management**: Ensure the bot has all necessary permissions for proper tracking
+5. **Outage Handling**: Monitor guild availability events for potential state issues
 
 ## Technical Details
 
 ### Event Flow
 1. Voice state changes trigger `voiceStateUpdate` event
 2. Member updates trigger `guildMemberUpdate` event
-3. Channel deletions trigger `channelDelete` event
-4. Member removals trigger `guildMemberRemove` event
-5. All events are logged and processed for state consistency
+3. Member joins/leaves trigger `guildMemberAdd`/`guildMemberRemove` events
+4. Channel deletions trigger `channelDelete` event
+5. Guild availability changes trigger `guildUnavailable`/`guildAvailable` events
+6. All events are logged and processed for state consistency
 
 ### State Validation Process
 1. Scan all voice channels in the guild
@@ -170,4 +223,17 @@ Console logging can be controlled by modifying the logging statements in the eve
 - All events include try-catch blocks for error handling
 - Failed operations are logged but don't crash the bot
 - State validation continues even if individual channels fail
-- Manual commands provide fallback recovery options 
+- Manual commands provide fallback recovery options
+- Guild availability events trigger automatic recovery validation
+
+## Discord API Compliance
+
+Our implementation follows Discord's official Gateway API event specifications:
+
+- **Gateway Intents**: Uses `Guilds`, `GuildVoiceStates`, and `GuildMembers` intents
+- **Event Coverage**: Handles all relevant events for voice channel state management
+- **Error Handling**: Implements proper error handling for all events
+- **Rate Limiting**: Respects Discord's rate limits through Discord.js
+- **State Management**: Maintains consistent state across all events
+
+This comprehensive approach ensures that we catch all possible scenarios that could lead to state synchronization issues, making the bot robust against network issues, missed events, and edge cases. 
