@@ -1,5 +1,8 @@
 import { Client, GatewayIntentBits } from 'discord.js';
+import { channelDeleteEvent } from './events/channelDelete';
 import { guildCreateEvent } from './events/guildCreate';
+import { guildMemberRemoveEvent } from './events/guildMemberRemove';
+import { guildMemberUpdateEvent } from './events/guildMemberUpdate';
 import { interactionCreateEvent } from './events/interactionCreate';
 import { readyEvent } from './events/ready';
 import { voiceStateUpdateEvent } from './events/voiceStateUpdate';
@@ -13,7 +16,11 @@ console.log(`\n`);
 initializeDataDirectory();
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+  intents: [
+    GatewayIntentBits.Guilds, 
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMembers,
+  ],
 });
 
 // Type-safe event registration using Discord.js's built-in typing
@@ -21,7 +28,9 @@ client.once('ready', readyEvent.execute);
 client.on('interactionCreate', interactionCreateEvent.execute);
 client.on('voiceStateUpdate', voiceStateUpdateEvent.execute);
 client.on('guildCreate', guildCreateEvent.execute);
-client.on('guildCreate', guildCreateEvent.execute);
+client.on('guildMemberUpdate', guildMemberUpdateEvent.execute);
+client.on('guildMemberRemove', guildMemberRemoveEvent.execute);
+client.on('channelDelete', channelDeleteEvent.execute);
 
 console.log(`🔍 Logging in with token: ${import.meta.env.DISCORD_BOT_TOKEN}`);
 client.login(import.meta.env.DISCORD_BOT_TOKEN);

@@ -1,16 +1,16 @@
 import { Events, GuildMember, VoiceBasedChannel, VoiceState } from 'discord.js';
 import { getVoiceChannelTextChat } from '../discord/channels';
 import {
-  buildDescriptionFromUserLines,
-  buildSessionEmbed,
-  getNotifyRoleMention,
-  parseUserLines,
-  updateUserLine,
+    buildDescriptionFromUserLines,
+    buildSessionEmbed,
+    getNotifyRoleMention,
+    parseUserLines,
+    updateUserLine,
 } from '../discord/embeds';
 import {
-  findLatestEmbedByUser,
-  sendEmbedMessage,
-  updateEmbedMessage,
+    findLatestEmbedByUser,
+    sendEmbedMessage,
+    updateEmbedMessage,
 } from '../discord/messages';
 import { logError } from '../utils/errorHandling';
 import { getFormattedSessionStartMessage } from '../utils/sessionMessages';
@@ -26,20 +26,39 @@ const handleVoiceStateUpdate = async (
   const newChannel = newState.channel;
   const now = new Date();
 
+  // Enhanced logging for debugging
+  console.log(`🎤 Voice state update for ${member.user.tag}:`, {
+    oldChannel: oldChannel?.name || 'none',
+    newChannel: newChannel?.name || 'none',
+    oldChannelId: oldChannel?.id || 'none',
+    newChannelId: newChannel?.id || 'none',
+    timestamp: now.toISOString(),
+  });
+
   // User left a channel
   if (oldChannel && !newChannel) {
+    console.log(`🚪 ${member.user.tag} left channel: ${oldChannel.name}`);
     await handleLeave(oldChannel, member, now);
   }
 
   // User joined a channel
   if (!oldChannel && newChannel) {
+    console.log(`🚪 ${member.user.tag} joined channel: ${newChannel.name}`);
     await handleJoin(newChannel, member, now);
   }
 
   // User moved between channels
   if (oldChannel && newChannel && oldChannel.id !== newChannel.id) {
+    console.log(`🔄 ${member.user.tag} moved from ${oldChannel.name} to ${newChannel.name}`);
     await handleLeave(oldChannel, member, now);
     await handleJoin(newChannel, member, now);
+  }
+
+  // Log current state for debugging
+  if (newChannel) {
+    const nonBotMembers = newChannel.members.filter(m => !m.user.bot);
+    console.log(`📊 Channel ${newChannel.name} now has ${nonBotMembers.size} non-bot members:`, 
+      nonBotMembers.map(m => m.user.tag).join(', '));
   }
 };
 

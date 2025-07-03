@@ -3,6 +3,8 @@ import { addNotificationRoleCommand } from '../commands/addNotificationRole';
 import { changeVcNotifyRoleCommand } from '../commands/changeVcNotifyRole';
 import { removeNotificationRoleCommand } from '../commands/removeNotificationRole';
 import { setSessionStartMessageCommand } from '../commands/setSessionStartMessage';
+import { syncVoiceStateCommand } from '../commands/syncVoiceState';
+import { validateVoiceStateCommand } from '../commands/validateVoiceState';
 import { registerCommands } from '../utils/commandRegistration';
 import { logError, sendErrorResponse } from '../utils/errorHandling';
 
@@ -15,6 +17,8 @@ const commands: Record<string, Command> = {
   'set-session-start-message': setSessionStartMessageCommand,
   'add-notification-role': addNotificationRoleCommand,
   'remove-notification-role': removeNotificationRoleCommand,
+  'sync-voice-state': syncVoiceStateCommand,
+  'validate-voice-state': validateVoiceStateCommand,
 };
 
 const tryRegisterCommands = async (): Promise<void> => {
